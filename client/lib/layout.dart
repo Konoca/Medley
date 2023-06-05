@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'package:just_audio/just_audio.dart';
 
 import 'package:medley/media_controls.dart';
 
@@ -20,8 +21,9 @@ class PageLayout extends StatefulWidget {
 
 class _PageLayoutState extends State<PageLayout> {
   int pageIndex = 0;
+  double progress = 0;
 
-  Widget selectPage(bool display) {
+  Widget selectPage(BuildContext ctx) {
     Widget p = const HomePage();
     if (pageIndex == 1) p = const SearchPage();
     if (pageIndex == 2) p = const AccountPage();
@@ -31,17 +33,49 @@ class _PageLayoutState extends State<PageLayout> {
           flex: 1,
           child: p,
         ),
-        nowPlaying(display),
+        nowPlaying(ctx),
       ],
     );
   }
 
-  Widget nowPlaying(bool display) {
+  Widget nowPlaying(BuildContext ctx) {
+    bool display = ctx.watch<CurrentlyPlaying>().display;
+    AudioPlayer player = ctx.watch<CurrentlyPlaying>().player;
+
+    int duration = 0;
+
+    player.positionStream.listen((event) {
+      if (player.duration == null) {
+        setState(() => progress = 0);
+        return;
+      }
+      duration = player.duration!.inSeconds;
+      setState(() {
+        progress = event.inSeconds / duration;
+      });
+    });
+
     if (display || kIsWeb || (!Platform.isIOS && !Platform.isAndroid)) {
-      return Container(
-        alignment: Alignment.bottomCenter,
-        decoration: const BoxDecoration(color: Color(0x801E1E1E)),
-        child: const MediaControls(),
+      return Column(
+        children: [
+          LinearProgressIndicator(
+            color: Colors.white,
+            value: progress,
+          ),
+          // Slider(
+          //   activeColor: Colors.white,
+          //   inactiveColor: const Color(0xFF404040),
+          //   value: context.watch<CurrentlyPlaying>().volume,
+          //   onChanged: (v) => context.read<CurrentlyPlaying>().setVolume(v),
+          //   thumbColor: Colors.transparent,
+          //   overlayColor: MaterialStateProperty.all(Colors.transparent),
+          // ),
+          Container(
+            alignment: Alignment.bottomCenter,
+            decoration: const BoxDecoration(color: Color(0x801E1E1E)),
+            child: const MediaControls(),
+          ),
+        ],
       );
     }
     return Container();
@@ -54,7 +88,7 @@ class _PageLayoutState extends State<PageLayout> {
         backgroundColor: Colors.transparent,
         toolbarHeight: 20,
       ),
-      body: selectPage(context.watch<CurrentlyPlaying>().display),
+      body: selectPage(context),
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: const Color(0xFF1E1E1E),
         selectedItemColor: const Color(0xFF73A5FD),
@@ -89,7 +123,7 @@ class _PageLayoutState extends State<PageLayout> {
         backgroundColor: Colors.transparent,
         toolbarHeight: 50,
       ),
-      body: selectPage(context.watch<CurrentlyPlaying>().isPlaying),
+      body: selectPage(context),
       floatingActionButton: Container(
         // color: const Color(0x80404040),
         decoration: const BoxDecoration(
@@ -108,10 +142,7 @@ class _PageLayoutState extends State<PageLayout> {
 
   @override
   Widget build(BuildContext context) {
-    if (kIsWeb) {
-      return desktopLayout();
-    }
-    if (Platform.isAndroid || Platform.isIOS) {
+    if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
       return mobileLayout();
     }
     return desktopLayout();

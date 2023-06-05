@@ -37,7 +37,6 @@ bool isMobile() {
   return (!kIsWeb && (Platform.isIOS || Platform.isAndroid));
 }
 
-// TODO playback progress bar
 class _MediaControlsState extends State<MediaControls> {
   @override
   Widget build(BuildContext context) {
@@ -106,8 +105,8 @@ class _ControlsState extends State<Controls> {
         IconButton(
           onPressed: () => context.read<CurrentlyPlaying>().togglePlaying(),
           icon: context.watch<CurrentlyPlaying>().isPlaying
-              ? const Icon(Icons.play_arrow_rounded)
-              : const Icon(Icons.pause_rounded),
+              ? const Icon(Icons.pause_rounded)
+              : const Icon(Icons.play_arrow_rounded),
           iconSize: 50,
           splashRadius: 25,
         ),
@@ -134,8 +133,8 @@ class _ControlsState extends State<Controls> {
         IconButton(
           onPressed: () => context.read<CurrentlyPlaying>().togglePlaying(),
           icon: context.watch<CurrentlyPlaying>().isPlaying
-              ? const Icon(Icons.play_circle)
-              : const Icon(Icons.pause_circle),
+              ? const Icon(Icons.pause_circle)
+              : const Icon(Icons.play_circle),
           iconSize: 50,
         ),
         IconButton(

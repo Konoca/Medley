@@ -42,7 +42,16 @@ class CurrentlyPlaying with ChangeNotifier {
 
   void togglePlaying() {
     _isPlaying = !_isPlaying;
+    togglePlayer();
     notifyListeners();
+  }
+  
+  void togglePlayer() async {
+    if (!_isPlaying) {
+      await _player.pause();
+    } else {
+      await _player.play();
+    }
   }
 
   void toggleShuffle() {

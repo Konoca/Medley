@@ -50,6 +50,29 @@ class Playlist {
           Song.test2(),
         ];
 
+  Playlist.test4()
+      : title = 'Test',
+        platform = Platform.soundcloud(),
+        id = 3,
+        listId = '',
+        numberOfTracks = 2,
+        songs = [
+          Song.test3(),
+          Song.test3(),
+        ];
+  
+  Playlist.test5()
+      : title = 'Test',
+        platform = Platform.soundcloud(),
+        id = 3,
+        listId = '',
+        numberOfTracks = 3,
+        songs = [
+          Song.test(),
+          Song.test2(),
+          Song.test3(),
+        ];
+
   Playlist.empty()
       : title = '',
         platform = Platform.empty(),
@@ -73,6 +96,8 @@ class AllPlaylists {
       Playlist.test(),
       Playlist.test2(),
       Playlist.test3(),
+      Playlist.test4(),
+      Playlist.test5(),
     ];
     youtube = [
       Playlist.test(),

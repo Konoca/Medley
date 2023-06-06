@@ -126,7 +126,7 @@ class _ControlsState extends State<Controls> {
               : Colors.white,
         ),
         IconButton(
-          onPressed: () => {},
+          onPressed: () => context.read<CurrentlyPlaying>().prevSong(),
           icon: const Icon(Icons.fast_rewind_rounded),
           iconSize: 25,
         ),
@@ -138,7 +138,7 @@ class _ControlsState extends State<Controls> {
           iconSize: 50,
         ),
         IconButton(
-          onPressed: () => {},
+          onPressed: () => context.read<CurrentlyPlaying>().nextSong(),
           icon: const Icon(Icons.fast_forward_rounded),
           iconSize: 25,
         ),

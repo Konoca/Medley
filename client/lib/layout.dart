@@ -56,7 +56,7 @@ class _PageLayoutState extends State<PageLayout> {
     });
 
     player.playerStateStream.listen((state) {
-      if (state.processingState == ProcessingState.completed) {
+      if (state.processingState == ProcessingState.completed && player.playing) {
         player.stop();
         ctx.read<CurrentlyPlaying>().nextSong();
       }

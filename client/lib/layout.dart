@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:just_audio/just_audio.dart';
 
-import 'package:medley/media_controls.dart';
+import 'package:medley/components/media_controls.dart';
 
 import 'package:medley/screens/home.dart';
 import 'package:medley/screens/search.dart';
@@ -55,6 +55,13 @@ class _PageLayoutState extends State<PageLayout> {
       });
     });
 
+    player.playerStateStream.listen((state) {
+      if (state.processingState == ProcessingState.completed) {
+        player.stop();
+        ctx.read<CurrentlyPlaying>().nextSong();
+      }
+    });
+
     if (display || kIsWeb || (!Platform.isIOS && !Platform.isAndroid)) {
       return Column(
         children: [
@@ -62,14 +69,6 @@ class _PageLayoutState extends State<PageLayout> {
             color: Colors.white,
             value: progress,
           ),
-          // Slider(
-          //   activeColor: Colors.white,
-          //   inactiveColor: const Color(0xFF404040),
-          //   value: context.watch<CurrentlyPlaying>().volume,
-          //   onChanged: (v) => context.read<CurrentlyPlaying>().setVolume(v),
-          //   thumbColor: Colors.transparent,
-          //   overlayColor: MaterialStateProperty.all(Colors.transparent),
-          // ),
           Container(
             alignment: Alignment.bottomCenter,
             decoration: const BoxDecoration(color: Color(0x801E1E1E)),
@@ -87,6 +86,7 @@ class _PageLayoutState extends State<PageLayout> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         toolbarHeight: 20,
+        scrolledUnderElevation: 0,
       ),
       body: selectPage(context),
       bottomNavigationBar: BottomNavigationBar(

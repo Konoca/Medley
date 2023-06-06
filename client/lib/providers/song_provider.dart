@@ -10,11 +10,14 @@ class CurrentlyPlaying with ChangeNotifier {
   bool _loop = false;
   double _volume = 1;
 
-
   Song _song = Song.empty();
   Playlist _playlist = Playlist.empty();
 
   final AudioPlayer _player = AudioPlayer();
+
+  List<Song> _queue = [];
+  int _queueIndex = 0;
+  String _cachedUrl = '';
 
   bool get display => _display;
   bool get isPlaying => _isPlaying;
@@ -29,43 +32,67 @@ class CurrentlyPlaying with ChangeNotifier {
     _display = true;
     _isPlaying = true;
     _song = song;
-    await _player.setUrl(_song.url);
+
+    if (_cachedUrl == '') {
+      await _player.setUrl(await _song.url);
+    } else {
+      await _player.setUrl(_cachedUrl);
+    }
+
     await _player.play();
     notifyListeners();
+
+    if (_queueIndex < _queue.length) {
+      _cachedUrl = await _queue[_queueIndex+1].url;
+    }
   }
 
   void setPlaylist(Playlist pl) {
+    _player.stop();
+
     _playlist = pl;
-    setSong(_playlist.songs[0]);
+    _display = true;
+    _isPlaying = true;
+
+    _queue = _playlist.songs;
+    _queueIndex = 0;
+
+    setSong(_queue[_queueIndex]);
     notifyListeners();
   }
 
-  void togglePlaying() {
-    _isPlaying = !_isPlaying;
-    togglePlayer();
-    notifyListeners();
+  void nextSong() async {
+    if (!_loop) _queueIndex++;
+    if (_queueIndex >= _queue.length) _queueIndex = 0;
+    setSong(_queue[_queueIndex]);
   }
-  
-  void togglePlayer() async {
+
+  void togglePlaying() async {
+    _isPlaying = !_isPlaying;
     if (!_isPlaying) {
       await _player.pause();
     } else {
       await _player.play();
     }
+    notifyListeners();
   }
 
   void toggleShuffle() {
     _shuffle = !_shuffle;
+    if (_shuffle) _player.shuffle();
     notifyListeners();
   }
 
   void toggleLoop() {
     _loop = !_loop;
+    // if (_loop) _player.setLoopMode(LoopMode.one);
+    // else _player.setLoopMode(LoopMode.all);
     notifyListeners();
   }
 
   void setVolume(double v) {
     _volume = v;
+    _player.setVolume(v);
     notifyListeners();
   }
 }

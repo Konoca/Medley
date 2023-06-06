@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import 'package:provider/provider.dart';
 import 'package:medley/providers/song_provider.dart';
 import 'package:medley/objects/playlist.dart';
@@ -20,8 +21,13 @@ class _HomePageState extends State<HomePage> {
           color: const Color(0x80000000),
           borderRadius: BorderRadius.circular(15),
         ),
+        height: 210,
+        width: 200,
+        margin: const EdgeInsets.all(5),
+        padding: const EdgeInsets.symmetric(vertical: 5),
         child: Column(
           children: [
+            // const Spacer(),
             const Spacer(),
             Image(image: NetworkImage(pl.songs[0].imgUrl), height: 150),
             Text(pl.title),
@@ -31,24 +37,90 @@ class _HomePageState extends State<HomePage> {
                 color: Color(0x80FFFFFF),
               ),
             ),
-            const Spacer(),
+            // const Spacer(),
           ],
         ),
       ),
     );
   }
 
+  List<Widget> fetchPlaylists(double width) {
+    List<Widget> w = [];
+    int columns = (width / 210).floor();
+
+    AllPlaylists playlists = AllPlaylists.fetch();
+
+    if (playlists.custom.isNotEmpty) {
+      w = platformList(w, playlists.custom, columns);
+    }
+
+    if (playlists.youtube.isNotEmpty) {
+      w.add(platformLabel('assets/icons/youtube.png', "Youtube"));
+      w = platformList(w, playlists.youtube, columns);
+    }
+
+    if (playlists.spotify.isNotEmpty) {
+      w.add(platformLabel('assets/icons/spotofy.png', "Spotify"));
+      w = platformList(w, playlists.spotify, columns);
+    }
+
+    if (playlists.soundcloud.isNotEmpty) {
+      w.add(platformLabel('assets/icons/soundcloud.png', "Soundcloud"));
+      w = platformList(w, playlists.soundcloud, columns);
+    }
+
+    return w;
+  }
+
+  List<Widget> platformList(List<Widget> w, List<Playlist> pls, int columns) {
+    List<Widget> children = [];
+    int i = 0;
+    for (Playlist pl in pls) {
+      if (i == -1) {
+        w.add(Row(children: children));
+        children = [];
+        i = 0;
+      }
+      children.add(createTile(pl));
+      i++;
+      if (i >= columns) i = -1;
+    }
+    w.add(Row(children: children));
+    return w;
+  }
+
+  Widget platformLabel(String asset, String name) {
+    return Row(
+      children: [
+        // Icon(
+        //   icon,
+        //   color: Colors.black,
+        //   size: 40,
+        // ),
+        Image.asset(
+          asset,
+          height: 40,
+          // color: const Color(0xFF1E1E1E),
+          color: Colors.black,
+        ),
+        Text(
+          name,
+          style: const TextStyle(
+            color: Colors.black,
+            fontSize: 40,
+            fontWeight: FontWeight.bold,
+          ),
+        )
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return GridView.count(
-      crossAxisCount: 2,
-      crossAxisSpacing: 5,
-      mainAxisSpacing: 5,
+    return ListView(
       padding: const EdgeInsets.all(5),
-      children: [
-        createTile(Playlist.test()),
-        createTile(Playlist.test2()),
-      ],
+      scrollDirection: Axis.vertical,
+      children: fetchPlaylists(MediaQuery.of(context).size.width),
     );
   }
 }

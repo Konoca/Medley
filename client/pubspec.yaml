@@ -40,6 +40,8 @@ dependencies:
   just_audio_background: ^0.0.1-beta.10
   just_audio_mpv: ^0.1.6
   just_audio_windows: ^0.2.0
+  flutter_dotenv: ^5.1.0
+  http: ^0.13.6
 
 dev_dependencies:
   flutter_test:
@@ -67,6 +69,11 @@ flutter:
   # assets:
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
+  assets:
+    - .env
+    - assets/icons/youtube.png
+    - assets/icons/spotify.png
+    - assets/icons/soundcloud.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

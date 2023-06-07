@@ -13,7 +13,7 @@ class Platform {
   Platform.youtube()
       : name = "Youtube",
         id = 1,
-        codec = "mp4";
+        codec = "m4a";
 
   Platform.spotify()
       : name = "Spotify",

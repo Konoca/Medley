@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
-import 'package:just_audio/just_audio.dart';
+import 'package:audioplayers/audioplayers.dart';
 
 import 'package:medley/components/media_controls.dart';
 
@@ -22,6 +22,7 @@ class PageLayout extends StatefulWidget {
 class _PageLayoutState extends State<PageLayout> {
   int pageIndex = 0;
   double progress = 0;
+  Duration songDuration = Duration.zero;
 
   Widget selectPage(BuildContext ctx) {
     Widget p = const HomePage();
@@ -42,24 +43,28 @@ class _PageLayoutState extends State<PageLayout> {
     bool display = ctx.watch<CurrentlyPlaying>().display;
     AudioPlayer player = ctx.watch<CurrentlyPlaying>().player;
 
-    int duration = 0;
-
-    player.positionStream.listen((event) {
-      if (player.duration == null) {
-        setState(() => progress = 0);
-        return;
-      }
-      duration = player.duration!.inSeconds;
+    player.onDurationChanged.listen((duration) {
       setState(() {
-        progress = event.inSeconds / duration;
+        songDuration = duration;
       });
     });
 
-    player.playerStateStream.listen((state) {
-      if (state.processingState == ProcessingState.completed && player.playing) {
-        player.stop();
-        ctx.read<CurrentlyPlaying>().nextSong();
+    player.onPositionChanged.listen((position) {
+      if (songDuration == Duration.zero) {
+        setState(() => progress = 0);
+        return;
       }
+
+      ctx.read<CurrentlyPlaying>().setProgress(position);
+
+      setState(() {
+        progress = position.inSeconds / songDuration.inSeconds;
+      });
+    });
+
+    player.onPlayerComplete.listen((state) {
+      player.stop();
+      ctx.read<CurrentlyPlaying>().nextSong();
     });
 
     if (display || kIsWeb || (!Platform.isIOS && !Platform.isAndroid)) {

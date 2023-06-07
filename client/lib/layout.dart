@@ -59,7 +59,7 @@ class _PageLayoutState extends State<PageLayout> {
       // work around until I figure out *why* 
       //apple devices misread the duration of .m4a
       if (isApple() && song.platform.id == AudioPlatform.youtube().id) {
-        duration = Duration(seconds: (duration.inSeconds.toDouble() ~/ 2));
+        duration = Duration(microseconds: (duration.inMicroseconds.toDouble() ~/ 2));
       }
 
       setState(() => songDuration = duration);
@@ -74,7 +74,7 @@ class _PageLayoutState extends State<PageLayout> {
       ctx.read<CurrentlyPlaying>().setProgress(position);
 
       setState(() {
-        progress = position.inSeconds / songDuration.inSeconds;
+        progress = position.inMicroseconds / songDuration.inMicroseconds;
       });
 
       if (progress > 1) nextSong(ctx);

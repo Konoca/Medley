@@ -96,6 +96,41 @@ class _NowPlayingState extends State<NowPlaying> {
   }
 }
 
+List<Widget> controlGroup(BuildContext context, double iconSize) {
+  return [
+    IconButton(
+      onPressed: () => context.read<CurrentlyPlaying>().toggleShuffle(),
+      icon: const Icon(Icons.shuffle),
+      iconSize: iconSize,
+      color:
+          context.watch<CurrentlyPlaying>().shuffle ? Colors.blue : Colors.grey,
+    ),
+    IconButton(
+      onPressed: () => context.read<CurrentlyPlaying>().prevSong(),
+      icon: const Icon(Icons.fast_rewind_rounded),
+      iconSize: iconSize,
+    ),
+    IconButton(
+      onPressed: () => context.read<CurrentlyPlaying>().togglePlaying(),
+      icon: context.watch<CurrentlyPlaying>().isPlaying
+          ? const Icon(Icons.pause_circle)
+          : const Icon(Icons.play_circle),
+      iconSize: iconSize * 2,
+    ),
+    IconButton(
+      onPressed: () => context.read<CurrentlyPlaying>().nextSong(),
+      icon: const Icon(Icons.fast_forward_rounded),
+      iconSize: iconSize,
+    ),
+    IconButton(
+      onPressed: () => context.read<CurrentlyPlaying>().toggleLoop(),
+      icon: const Icon(Icons.loop),
+      iconSize: iconSize,
+      color: context.watch<CurrentlyPlaying>().loop ? Colors.blue : Colors.grey,
+    ),
+  ];
+}
+
 class _ControlsState extends State<Controls> {
   @override
   Widget build(BuildContext context) {
@@ -116,41 +151,7 @@ class _ControlsState extends State<Controls> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        IconButton(
-          onPressed: () => context.read<CurrentlyPlaying>().toggleShuffle(),
-          icon: const Icon(Icons.shuffle),
-          iconSize: 25,
-          color: context.watch<CurrentlyPlaying>().shuffle
-              ? Colors.blue
-              : Colors.white,
-        ),
-        IconButton(
-          onPressed: () => context.read<CurrentlyPlaying>().prevSong(),
-          icon: const Icon(Icons.fast_rewind_rounded),
-          iconSize: 25,
-        ),
-        IconButton(
-          onPressed: () => context.read<CurrentlyPlaying>().togglePlaying(),
-          icon: context.watch<CurrentlyPlaying>().isPlaying
-              ? const Icon(Icons.pause_circle)
-              : const Icon(Icons.play_circle),
-          iconSize: 50,
-        ),
-        IconButton(
-          onPressed: () => context.read<CurrentlyPlaying>().nextSong(),
-          icon: const Icon(Icons.fast_forward_rounded),
-          iconSize: 25,
-        ),
-        IconButton(
-          onPressed: () => context.read<CurrentlyPlaying>().toggleLoop(),
-          icon: const Icon(Icons.loop),
-          iconSize: 25,
-          color: context.watch<CurrentlyPlaying>().loop
-              ? Colors.blue
-              : Colors.white,
-        ),
-      ],
+      children: controlGroup(context, 25),
     );
   }
 }

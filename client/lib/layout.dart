@@ -63,7 +63,7 @@ class _PageLayoutState extends State<PageLayout> {
     });
 
     player.onPlayerComplete.listen((state) {
-      player.stop();
+      // player.stop();
       ctx.read<CurrentlyPlaying>().nextSong();
     });
 

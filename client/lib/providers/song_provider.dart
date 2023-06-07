@@ -45,10 +45,10 @@ class CurrentlyPlaying with ChangeNotifier {
 
     if (_cachedUrl == '') {
       if (_currentUrl == '') _currentUrl = await _song.url;
-      await _player.play(UrlSource(_currentUrl));
+      _player.play(UrlSource(_currentUrl));
     }
     else {
-      await _player.play(UrlSource(_cachedUrl));
+      _player.play(UrlSource(_cachedUrl));
       _currentUrl = _cachedUrl;
       _cachedUrl = '';
     }

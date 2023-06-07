@@ -1,6 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:just_audio/just_audio.dart';
+import 'package:audioplayers/audioplayers.dart';
 import 'package:medley/objects/song.dart';
 import 'package:medley/objects/playlist.dart';
 
@@ -10,6 +10,7 @@ class CurrentlyPlaying with ChangeNotifier {
   bool _shuffle = false;
   bool _loop = false;
   double _volume = 1;
+  Duration _progress = Duration.zero;
 
   Song _song = Song.empty();
   Playlist _playlist = Playlist.empty();
@@ -40,19 +41,17 @@ class CurrentlyPlaying with ChangeNotifier {
     _song = _queue[_nextIndex];
     _queueIndex = _nextIndex;
 
-    if (_player.playing) _player.stop();
+    if (_player.state == PlayerState.playing) _player.stop();
 
     if (_cachedUrl == '') {
       if (_currentUrl == '') _currentUrl = await _song.url;
-      await _player.setUrl(_currentUrl);
+      _player.play(UrlSource(_currentUrl));
     }
     else {
-      await _player.setUrl(_cachedUrl);
+      _player.play(UrlSource(_cachedUrl));
       _currentUrl = _cachedUrl;
       _cachedUrl = '';
     }
-
-    _player.play();
 
     _cacheNext();
 
@@ -60,7 +59,7 @@ class CurrentlyPlaying with ChangeNotifier {
   }
 
   void setPlaylist(Playlist pl) {
-    if (_player.playing) _player.stop();
+    if (_player.state == PlayerState.playing) _player.stop();
 
     _playlist = pl;
     _display = true;
@@ -80,7 +79,7 @@ class CurrentlyPlaying with ChangeNotifier {
 
   void nextSong() {
     if (_queue.isEmpty) return;
-    if (_player.position.inSeconds < 3) return;
+    if (_progress.inSeconds < 3) return;
 
     if (_loop) {
       _cachedUrl = _currentUrl;
@@ -92,7 +91,7 @@ class CurrentlyPlaying with ChangeNotifier {
 
   void prevSong() {
     if (_queue.isEmpty) return;
-    if (_player.position.inSeconds < 3) return;
+    if (_progress.inSeconds < 3) return;
 
     _cachedUrl = _currentUrl;
     _nextIndex = _queueIndex;
@@ -103,7 +102,7 @@ class CurrentlyPlaying with ChangeNotifier {
     if (_queue.isEmpty) return;
 
     _isPlaying = !_isPlaying;
-    isPlaying ? _player.play() : _player.pause();
+    _isPlaying ? _player.resume() : _player.pause();
     notifyListeners();
   }
 
@@ -122,6 +121,11 @@ class CurrentlyPlaying with ChangeNotifier {
   void setVolume(double v) {
     _volume = v;
     _player.setVolume(v);
+    notifyListeners();
+  }
+
+  void setProgress(Duration progress) {
+    _progress = progress;
     notifyListeners();
   }
 

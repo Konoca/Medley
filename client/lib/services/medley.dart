@@ -5,7 +5,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:medley/objects/platform.dart';
 
 class MedleyService {
-  Future<String> getStreamUrl(Platform platform, String id) async {
+  Future<String> getStreamUrl(AudioPlatform platform, String id) async {
     var url = Uri.http(
       dotenv.env['SERVER_URL']!,
       '/stream',

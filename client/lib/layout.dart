@@ -1,9 +1,11 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
-import 'package:just_audio/just_audio.dart';
+import 'package:audioplayers/audioplayers.dart';
 
 import 'package:medley/components/media_controls.dart';
+import 'package:medley/objects/platform.dart';
+import 'package:medley/objects/song.dart';
 
 import 'package:medley/screens/home.dart';
 import 'package:medley/screens/search.dart';
@@ -22,6 +24,7 @@ class PageLayout extends StatefulWidget {
 class _PageLayoutState extends State<PageLayout> {
   int pageIndex = 0;
   double progress = 0;
+  Duration songDuration = Duration.zero;
 
   Widget selectPage(BuildContext ctx) {
     Widget p = const HomePage();
@@ -38,28 +41,50 @@ class _PageLayoutState extends State<PageLayout> {
     );
   }
 
+  void nextSong(BuildContext ctx) {
+    ctx.read<CurrentlyPlaying>().nextSong();
+    setState(() => songDuration = Duration.zero);
+  }
+
+  bool isApple() {
+    return !kIsWeb && (Platform.isMacOS || Platform.isIOS);
+  }
+
   Widget nowPlaying(BuildContext ctx) {
     bool display = ctx.watch<CurrentlyPlaying>().display;
     AudioPlayer player = ctx.watch<CurrentlyPlaying>().player;
+    Song song = ctx.watch<CurrentlyPlaying>().song;
 
-    int duration = 0;
+    player.onDurationChanged.listen((duration) {
+      // work around until I figure out *why* 
+      //apple devices misread the duration of .m4a
+      if (isApple() && song.platform.id == AudioPlatform.youtube().id) {
+        duration = Duration(seconds: (duration.inSeconds.toDouble() ~/ 2));
+      }
 
-    player.positionStream.listen((event) {
-      if (player.duration == null) {
+      setState(() => songDuration = duration);
+    });
+
+    player.onPositionChanged.listen((position) {
+      if (songDuration == Duration.zero) {
         setState(() => progress = 0);
         return;
       }
-      duration = player.duration!.inSeconds;
+
+      ctx.read<CurrentlyPlaying>().setProgress(position);
+
       setState(() {
-        progress = event.inSeconds / duration;
+        progress = position.inSeconds / songDuration.inSeconds;
       });
+
+      if (progress > 1) nextSong(ctx);
     });
 
-    player.playerStateStream.listen((state) {
-      if (state.processingState == ProcessingState.completed && player.playing) {
-        player.stop();
-        ctx.read<CurrentlyPlaying>().nextSong();
-      }
+    player.onPlayerStateChanged.listen((state) {
+      if (songDuration == Duration.zero) return;
+      if (state != PlayerState.completed) return;
+
+      nextSong(ctx);
     });
 
     if (display || kIsWeb || (!Platform.isIOS && !Platform.isAndroid)) {
@@ -69,10 +94,13 @@ class _PageLayoutState extends State<PageLayout> {
             color: Colors.white,
             value: progress,
           ),
-          Container(
-            alignment: Alignment.bottomCenter,
-            decoration: const BoxDecoration(color: Color(0x801E1E1E)),
-            child: const MediaControls(),
+          InkWell(
+            onTap: () => mobileControlDrawer(context),
+            child: Container(
+              alignment: Alignment.bottomCenter,
+              decoration: const BoxDecoration(color: Color(0x801E1E1E)),
+              child: const MediaControls(),
+            ),
           ),
         ],
       );
@@ -113,6 +141,72 @@ class _PageLayoutState extends State<PageLayout> {
           });
         },
       ),
+    );
+  }
+
+  void mobileControlDrawer(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      useSafeArea: true,
+      backgroundColor: Colors.black,
+      barrierColor: Colors.black,
+      builder: (context) {
+        return Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Colors.black, Colors.black, Color(0x8073A5FD)],
+            ),
+          ),
+          padding: const EdgeInsets.only(top: 40),
+          child: Column(
+            children: [
+              Image(
+                image: NetworkImage(
+                  context.watch<CurrentlyPlaying>().song.imgUrl,
+                ),
+                height: 300,
+              ),
+              Container(
+                alignment: Alignment.center,
+                width: double.infinity,
+                child: Text(
+                  context.watch<CurrentlyPlaying>().song.title,
+                  overflow: TextOverflow.fade,
+                  style: const TextStyle(fontSize: 40),
+                ),
+              ),
+              Container(
+                alignment: Alignment.center,
+                width: double.infinity,
+                child: Text(
+                  context.watch<CurrentlyPlaying>().song.artist,
+                  style: const TextStyle(
+                    color: Color(0x80FFFFFF),
+                    fontSize: 20,
+                  ),
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.only(top: 50),
+                margin: const EdgeInsets.symmetric(horizontal: 20),
+                child: LinearProgressIndicator(
+                  color: Colors.white,
+                  value: progress,
+                ),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: controlGroup(context, 50),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 

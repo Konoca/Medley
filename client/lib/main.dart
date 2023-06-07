@@ -25,8 +25,8 @@ class MyApp extends StatelessWidget {
       home: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
+            begin: Alignment.topRight,
+            end: Alignment.bottomRight,
             colors: [Color(0x8073A5FD), Colors.black],
           ),
         ),

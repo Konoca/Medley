@@ -3,7 +3,7 @@ import 'package:medley/objects/song.dart';
 
 class Playlist {
   final String title;
-  final Platform platform;
+  final AudioPlatform platform;
   final int id;
   final String listId;
   final int numberOfTracks;
@@ -20,7 +20,7 @@ class Playlist {
 
   Playlist.test()
       : title = 'Favorites',
-        platform = Platform.empty(),
+        platform = AudioPlatform.empty(),
         id = 1,
         listId = '',
         numberOfTracks = 2,
@@ -31,7 +31,7 @@ class Playlist {
 
   Playlist.test2()
       : title = 'Liked Songs',
-        platform = Platform.soundcloud(),
+        platform = AudioPlatform.soundcloud(),
         id = 2,
         listId = '',
         numberOfTracks = 1,
@@ -41,7 +41,7 @@ class Playlist {
 
   Playlist.test3()
       : title = 'Test',
-        platform = Platform.soundcloud(),
+        platform = AudioPlatform.soundcloud(),
         id = 3,
         listId = '',
         numberOfTracks = 2,
@@ -52,7 +52,7 @@ class Playlist {
 
   Playlist.test4()
       : title = 'Test',
-        platform = Platform.soundcloud(),
+        platform = AudioPlatform.soundcloud(),
         id = 3,
         listId = '',
         numberOfTracks = 2,
@@ -63,7 +63,7 @@ class Playlist {
   
   Playlist.test5()
       : title = 'Test',
-        platform = Platform.soundcloud(),
+        platform = AudioPlatform.soundcloud(),
         id = 3,
         listId = '',
         numberOfTracks = 3,
@@ -75,7 +75,7 @@ class Playlist {
 
   Playlist.empty()
       : title = '',
-        platform = Platform.empty(),
+        platform = AudioPlatform.empty(),
         id = 0,
         listId = '',
         numberOfTracks = 0,

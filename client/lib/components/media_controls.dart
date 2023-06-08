@@ -12,6 +12,13 @@ class MediaControls extends StatefulWidget {
   State<MediaControls> createState() => _MediaControlsState();
 }
 
+class MobileMediaControls extends StatefulWidget {
+  const MobileMediaControls({super.key});
+
+  @override
+  State<MobileMediaControls> createState() => _MobileMediaControlsState();
+}
+
 class NowPlaying extends StatefulWidget {
   const NowPlaying({super.key});
 
@@ -47,6 +54,19 @@ class _MediaControlsState extends State<MediaControls> {
         NowPlaying(),
         Controls(),
         Volume(),
+      ],
+    );
+  }
+}
+
+class _MobileMediaControlsState extends State<MobileMediaControls> {
+  @override
+  Widget build(BuildContext context) {
+    return const Row(
+      // mainAxisSize: MainAxisSize.max,
+      children: [
+        NowPlaying(),
+        Controls(),
       ],
     );
   }
@@ -154,10 +174,6 @@ class _ControlsState extends State<Controls> {
 class _VolumeState extends State<Volume> {
   @override
   Widget build(BuildContext context) {
-    if (isMobile()) {
-      return Container();
-    }
-
     return Container(
       alignment: Alignment.centerRight,
       height: 75,

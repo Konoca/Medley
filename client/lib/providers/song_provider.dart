@@ -1,10 +1,11 @@
 import 'dart:math';
+import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:medley/objects/song.dart';
 import 'package:medley/objects/playlist.dart';
 
-class CurrentlyPlaying with ChangeNotifier {
+class CurrentlyPlaying extends BaseAudioHandler with ChangeNotifier {
   bool _display = false;
   bool _isPlaying = false;
   bool _shuffle = false;
@@ -33,6 +34,20 @@ class CurrentlyPlaying with ChangeNotifier {
   Playlist get playlist => _playlist;
   AudioPlayer get player => _player;
 
+  @override
+  Future<void> play() => _player.resume();
+  @override
+  Future<void> pause() => _player.pause();
+  @override
+  Future<void> stop() => _player.stop();
+  @override
+  Future<void> skipToNext() async => nextSong();
+  @override
+  Future<void> skipToPrevious() async => prevSong();
+  @override
+  Future<void> seek(Duration position) => _player.seek(position);
+  
+  // TODO implement
   void setSong() {}
 
   void playSong() async {

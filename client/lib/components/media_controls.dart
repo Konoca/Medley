@@ -40,20 +40,13 @@ bool isMobile() {
 class _MediaControlsState extends State<MediaControls> {
   @override
   Widget build(BuildContext context) {
-    return const Stack(
+    return const Row(
+      mainAxisSize: MainAxisSize.max,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         NowPlaying(),
-        Expanded(
-          flex: 1,
-          child: Controls(),
-        ),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Spacer(),
-            Volume(),
-          ],
-        )
+        Controls(),
+        Volume(),
       ],
     );
   }
@@ -65,6 +58,8 @@ class _NowPlayingState extends State<NowPlaying> {
     if (!context.watch<CurrentlyPlaying>().display) {
       return Container(
         height: 75,
+        width: 190,
+        padding: const EdgeInsets.symmetric(horizontal: 10),
       );
     }
 

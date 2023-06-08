@@ -12,6 +12,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  double playlistSize = 200;
+
   Widget createTile(Playlist pl) {
     return InkWell(
       onTap: () => context.read<CurrentlyPlaying>().setPlaylist(pl),
@@ -21,15 +23,15 @@ class _HomePageState extends State<HomePage> {
           color: const Color(0x80000000),
           borderRadius: BorderRadius.circular(15),
         ),
-        height: 210,
-        width: 200,
+        height: playlistSize + 10,
+        width: playlistSize,
         margin: const EdgeInsets.all(5),
         padding: const EdgeInsets.symmetric(vertical: 5),
         child: Column(
           children: [
             // const Spacer(),
             const Spacer(),
-            Image(image: NetworkImage(pl.songs[0].imgUrl), height: 150),
+            Image(image: NetworkImage(pl.songs[0].imgUrl), height: playlistSize - 50),
             Text(pl.title),
             Text(
               '${pl.numberOfTracks.toString()} tracks',
@@ -46,7 +48,12 @@ class _HomePageState extends State<HomePage> {
 
   List<Widget> fetchPlaylists(double width) {
     List<Widget> w = [];
-    int columns = (width / 210).floor();
+    int columns = (width / (playlistSize+10)).floor();
+
+    while (columns < 2) {
+      setState(() => playlistSize -= 10);
+      columns = (width / (playlistSize+10)).floor();
+    }
 
     AllPlaylists playlists = AllPlaylists.fetch();
 

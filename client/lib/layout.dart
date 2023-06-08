@@ -56,10 +56,11 @@ class _PageLayoutState extends State<PageLayout> {
     Song song = ctx.watch<CurrentlyPlaying>().song;
 
     player.onDurationChanged.listen((duration) {
-      // work around until I figure out *why* 
+      // work around until I figure out *why*
       //apple devices misread the duration of .m4a
       if (isApple() && song.platform.id == AudioPlatform.youtube().id) {
-        duration = Duration(seconds: (duration.inSeconds.toDouble() ~/ 2));
+        duration =
+            Duration(microseconds: (duration.inMicroseconds.toDouble() ~/ 2));
       }
 
       setState(() => songDuration = duration);
@@ -74,7 +75,7 @@ class _PageLayoutState extends State<PageLayout> {
       ctx.read<CurrentlyPlaying>().setProgress(position);
 
       setState(() {
-        progress = position.inSeconds / songDuration.inSeconds;
+        progress = position.inMicroseconds / songDuration.inMicroseconds;
       });
 
       if (progress > 1) nextSong(ctx);
@@ -94,18 +95,30 @@ class _PageLayoutState extends State<PageLayout> {
             color: Colors.white,
             value: progress,
           ),
-          InkWell(
-            onTap: () => mobileControlDrawer(context),
-            child: Container(
-              alignment: Alignment.bottomCenter,
-              decoration: const BoxDecoration(color: Color(0x801E1E1E)),
-              child: const MediaControls(),
-            ),
-          ),
+          controlBar(context),
         ],
       );
     }
     return Container();
+  }
+
+  Widget controlBar(BuildContext context) {
+    if (isMobile()) {
+      return InkWell(
+        onTap: () => mobileControlDrawer(context),
+        child: Container(
+          alignment: Alignment.bottomCenter,
+          decoration: const BoxDecoration(color: Color(0x801E1E1E)),
+          child: const MediaControls(),
+        ),
+      );
+    }
+
+    return Container(
+      alignment: Alignment.bottomCenter,
+      decoration: const BoxDecoration(color: Color(0x801E1E1E)),
+      child: const MediaControls(),
+    );
   }
 
   Widget mobileLayout() {

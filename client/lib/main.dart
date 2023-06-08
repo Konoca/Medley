@@ -1,3 +1,4 @@
+import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
@@ -5,7 +6,7 @@ import 'package:medley/layout.dart';
 import 'package:medley/providers/song_provider.dart';
 import 'package:provider/provider.dart';
 
-void main() async {
+Future<void> main() async {
   await dotenv.load(fileName: '.env');
   runApp(MultiProvider(
     providers: [ChangeNotifierProvider(create: (_) => CurrentlyPlaying())],

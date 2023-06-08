@@ -62,11 +62,19 @@ class _MediaControlsState extends State<MediaControls> {
 class _MobileMediaControlsState extends State<MobileMediaControls> {
   @override
   Widget build(BuildContext context) {
-    return const Row(
-      // mainAxisSize: MainAxisSize.max,
+    return Row(
+      mainAxisSize: MainAxisSize.max,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        NowPlaying(),
-        Controls(),
+        const NowPlaying(),
+        IconButton(
+          onPressed: () => context.read<CurrentlyPlaying>().togglePlaying(),
+          icon: context.watch<CurrentlyPlaying>().isPlaying
+              ? const Icon(Icons.pause_rounded)
+              : const Icon(Icons.play_arrow_rounded),
+          iconSize: 50,
+          splashRadius: 25,
+        ),
       ],
     );
   }
@@ -149,20 +157,6 @@ List<Widget> controlGroup(BuildContext context, double iconSize) {
 class _ControlsState extends State<Controls> {
   @override
   Widget build(BuildContext context) {
-    if (isMobile()) {
-      return Row(children: [
-        const Spacer(),
-        IconButton(
-          onPressed: () => context.read<CurrentlyPlaying>().togglePlaying(),
-          icon: context.watch<CurrentlyPlaying>().isPlaying
-              ? const Icon(Icons.pause_rounded)
-              : const Icon(Icons.play_arrow_rounded),
-          iconSize: 50,
-          splashRadius: 25,
-        ),
-      ]);
-    }
-
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,

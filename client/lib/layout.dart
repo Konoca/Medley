@@ -109,7 +109,7 @@ class _PageLayoutState extends State<PageLayout> {
         child: Container(
           alignment: Alignment.bottomCenter,
           decoration: const BoxDecoration(color: Color(0x801E1E1E)),
-          child: const MediaControls(),
+          child: const MobileMediaControls(),
         ),
       );
     }

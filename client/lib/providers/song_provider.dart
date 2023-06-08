@@ -32,7 +32,7 @@ class CurrentlyPlaying with ChangeNotifier {
   Song get song => _song;
   Playlist get playlist => _playlist;
   AudioPlayer get player => _player;
-  
+
   // TODO implement
   void setSong() {}
 
@@ -47,8 +47,7 @@ class CurrentlyPlaying with ChangeNotifier {
     if (_cachedUrl == '') {
       if (_currentUrl == '') _currentUrl = await _song.url;
       _player.play(UrlSource(_currentUrl));
-    }
-    else {
+    } else {
       _player.play(UrlSource(_cachedUrl));
       _currentUrl = _cachedUrl;
       _cachedUrl = '';
@@ -144,7 +143,7 @@ class CurrentlyPlaying with ChangeNotifier {
       return;
     }
 
-    if (_queueIndex < _queue.length-1) {
+    if (_queueIndex < _queue.length - 1) {
       _nextIndex = _queueIndex + 1;
       return;
     }

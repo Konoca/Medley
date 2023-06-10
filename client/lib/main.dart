@@ -3,12 +3,16 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'package:medley/layout.dart';
 import 'package:medley/providers/song_provider.dart';
+import 'package:medley/providers/user_provider.dart';
 import 'package:provider/provider.dart';
 
 Future<void> main() async {
   await dotenv.load(fileName: '.env');
   runApp(MultiProvider(
-    providers: [ChangeNotifierProvider(create: (_) => CurrentlyPlaying())],
+    providers: [
+      ChangeNotifierProvider(create: (_) => CurrentlyPlaying()),
+      ChangeNotifierProvider(create: (_) => UserData()),
+    ],
     child: const MyApp(),
   ));
 }
@@ -18,6 +22,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    context.read<UserData>().login();
     return MaterialApp(
       title: 'Medley',
       theme: ThemeData.dark(useMaterial3: true),

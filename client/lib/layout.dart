@@ -12,6 +12,7 @@ import 'package:medley/screens/search.dart';
 import 'package:medley/screens/account.dart';
 
 import 'package:medley/providers/song_provider.dart';
+import 'package:medley/providers/user_provider.dart';
 import 'package:provider/provider.dart';
 
 class PageLayout extends StatefulWidget {
@@ -30,14 +31,17 @@ class _PageLayoutState extends State<PageLayout> {
     Widget p = const HomePage();
     if (pageIndex == 1) p = const SearchPage();
     if (pageIndex == 2) p = const AccountPage();
-    return Column(
-      children: [
-        Expanded(
-          flex: 1,
-          child: p,
-        ),
-        nowPlaying(ctx),
-      ],
+    return Container(
+      padding: const EdgeInsets.only(top: 50),
+      child: Column(
+        children: [
+          Expanded(
+            flex: 1,
+            child: p,
+          ),
+          nowPlaying(ctx),
+        ],
+      ),
     );
   }
 
@@ -124,11 +128,6 @@ class _PageLayoutState extends State<PageLayout> {
   Widget mobileLayout() {
     return Scaffold(
       backgroundColor: Colors.transparent,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        toolbarHeight: 20,
-        scrolledUnderElevation: 0,
-      ),
       body: selectPage(context),
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: const Color(0xFF1E1E1E),
@@ -223,26 +222,42 @@ class _PageLayoutState extends State<PageLayout> {
     );
   }
 
-  Widget desktopLayout() {
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        toolbarHeight: 50,
-      ),
-      body: selectPage(context),
-      floatingActionButton: Container(
-        // color: const Color(0x80404040),
+  Widget desktopActionButton(BuildContext context) {
+    if (pageIndex == 0) {
+      return Container(
         decoration: const BoxDecoration(
           borderRadius: BorderRadius.all(Radius.circular(45)),
           color: Color(0x80404040),
         ),
+        margin: const EdgeInsets.only(top: 10),
         child: IconButton(
           icon: const Icon(Icons.account_circle),
-          onPressed: () => {},
+          // onPressed: () => desktopAccounts(context),
+          onPressed: () => setState(() => pageIndex = 2),
           color: const Color(0xff1E1E1E),
         ),
+      );
+    }
+
+    return Container(
+      decoration: const BoxDecoration(
+        borderRadius: BorderRadius.all(Radius.circular(45)),
+        color: Color(0x80404040),
       ),
+      margin: const EdgeInsets.only(top: 10),
+      child: IconButton(
+        icon: const Icon(Icons.arrow_back_ios_new_rounded),
+        onPressed: () => setState(() => pageIndex = 0),
+        color: const Color(0xff1E1E1E),
+      ),
+    );
+  }
+
+  Widget desktopLayout() {
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      body: selectPage(context),
+      floatingActionButton: desktopActionButton(context),
       floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
     );
   }

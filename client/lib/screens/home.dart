@@ -29,7 +29,6 @@ class _HomePageState extends State<HomePage> {
         padding: const EdgeInsets.symmetric(vertical: 5),
         child: Column(
           children: [
-            // const Spacer(),
             const Spacer(),
             Image(image: NetworkImage(pl.songs[0].imgUrl), height: playlistSize - 50),
             Text(pl.title),
@@ -39,7 +38,6 @@ class _HomePageState extends State<HomePage> {
                 color: Color(0x80FFFFFF),
               ),
             ),
-            // const Spacer(),
           ],
         ),
       ),
@@ -99,21 +97,15 @@ class _HomePageState extends State<HomePage> {
   Widget platformLabel(String asset, String name) {
     return Row(
       children: [
-        // Icon(
-        //   icon,
-        //   color: Colors.black,
-        //   size: 40,
-        // ),
         Image.asset(
           asset,
           height: 40,
-          // color: const Color(0xFF1E1E1E),
-          color: Colors.black,
+          color: Colors.white,
         ),
         Text(
           name,
           style: const TextStyle(
-            color: Colors.black,
+            color: Colors.white,
             fontSize: 40,
             fontWeight: FontWeight.bold,
           ),

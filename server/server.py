@@ -108,6 +108,66 @@ def get_playlists():
         return jsonify({})
     return jsonify({})
 
+# Get a list of songs within a playlist based on platform and playlist ID
+@app.route('/api/get_songs', methods=['GET'])
+def get_songs():
+    platform = request.args.get('platform')
+    token = request.args.get('token')
+    playlistId = request.args.get('playlistId')
+    headers = { 'Authorization': f'Bearer {token}' }
+
+    try:
+        if platform == '1':
+            url = 'https://youtube.googleapis.com/youtube/v3/'
+
+            response = requests.get(url + 'playlistItems', headers=headers, params={'part': 'snippet,contentDetails', 'playlistId': playlistId})
+            if response.status_code == 200:
+                songs = json.loads(response.content)
+                songs_response = []
+
+                for item in songs['items']:
+                    video_resp = requests.get(url + 'videos', headers=headers, params={'part': 'contentDetails', 'id': item['snippet']['resourceId']['videoId']})
+
+                    if video_resp.status_code == 200:
+                        video = json.loads(video_resp.content)
+
+                        songs_response.append({
+                            'platform': platform,
+                            'song_id': item['snippet']['resourceId']['videoId'],
+                            'song_title': item['snippet']['title'],
+                            'artist': item['snippet']['videoOwnerChannelTitle'],
+                            'duration': video['items'][0]['contentDetails']['duration']
+                        })
+                    else:
+                        return jsonify({'error': 'could not get song length'}), 404
+                return jsonify(songs_response), 200
+            else:
+                return jsonify({'error': response.status_code})
+        elif platform == '2':
+            url = f'https://api.spotify.com/v1/playlists/{playlistId}/tracks'
+            response = requests.get(url, headers=headers)
+
+            if response.status_code == 200:
+                songs = json.loads(response.content)
+                songs_response = []
+
+                for item in songs['items']:
+                    songs_response.append({
+                        'platform': platform,
+                        'song_id': item['track']['id'],
+                        'song_title': item['track']['name'],
+                        'artist': item['track']['artists'][0]['name'],
+                        'duration': item['track']['duration_ms']
+                    })
+                return jsonify(songs_response), 200
+            else:
+                return jsonify({'error': response.status_code}) 
+        # TODO: Soundcloud support 
+    except Exception as e:
+        # TODO: Error handling
+        print(e)
+        return jsonify({})
+
 # Main thread
 if __name__ == '__main__':
     if cnx.is_connected(): 

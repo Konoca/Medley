@@ -44,8 +44,9 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  List<Widget> fetchPlaylists(double width) {
+  List<Widget> fetchPlaylists(BuildContext context) {
     List<Widget> w = [];
+    double width = MediaQuery.of(context).size.width;
     int columns = (width / (playlistSize+10)).floor();
 
     while (columns < 2) {
@@ -54,6 +55,7 @@ class _HomePageState extends State<HomePage> {
     }
 
     AllPlaylists playlists = AllPlaylists.fetch();
+    // context.watch<CurrentlyPlaying>().cachePlaylists(playlists);
 
     if (playlists.custom.isNotEmpty) {
       w = platformList(w, playlists.custom, columns);
@@ -119,7 +121,7 @@ class _HomePageState extends State<HomePage> {
     return ListView(
       padding: const EdgeInsets.all(5),
       scrollDirection: Axis.vertical,
-      children: fetchPlaylists(MediaQuery.of(context).size.width),
+      children: fetchPlaylists(context),
     );
   }
 }

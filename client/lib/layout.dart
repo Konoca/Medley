@@ -12,7 +12,6 @@ import 'package:medley/screens/search.dart';
 import 'package:medley/screens/account.dart';
 
 import 'package:medley/providers/song_provider.dart';
-import 'package:medley/providers/user_provider.dart';
 import 'package:provider/provider.dart';
 
 class PageLayout extends StatefulWidget {

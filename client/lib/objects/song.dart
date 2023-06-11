@@ -15,29 +15,15 @@ class Song {
     this.platform,
   );
 
-  Song.test()
-      : title = 'The Owl Song',
-        artist = 'The Owls',
-        imgUrl =
-            'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl.jpg',
-        platformId = 'psuRGfAaju4',
-        platform = AudioPlatform.youtube();
-
-  Song.test2()
-      : title = 'Owl On a Stick',
-        artist = 'The Owls',
-        imgUrl =
-            'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg',
-        platformId = 'birocratic/whenyoureable',
-        platform = AudioPlatform.soundcloud();
-
-  Song.test3()
-      : title = 'Lizard dance',
-        artist = 'The lizard',
-        imgUrl =
-            'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg',
-        platformId = 'LZsVk-ab0AA',
-        platform = AudioPlatform.youtube();
+  factory Song.fromJson(Map<String, dynamic> json, AudioPlatform platform) {
+    return Song(
+      json['song_title'],
+      json['artist'],
+      json['thumbnail'], // TODO image url
+      json['song_id'],
+      platform,
+    );
+  }
 
   Song.empty()
       : title = '',
@@ -82,7 +68,8 @@ class SongCacheKey {
   SongCacheKey(this.platform, this.platformId);
 
   @override
-  bool operator ==(covariant SongCacheKey other) => platform.id == other.platform.id && platformId == other.platformId;
+  bool operator ==(covariant SongCacheKey other) =>
+      platform.id == other.platform.id && platformId == other.platformId;
 
   @override
   int get hashCode => platformId.hashCode + platform.id;

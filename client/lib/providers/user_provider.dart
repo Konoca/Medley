@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
-// import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:medley/objects/playlist.dart';
 
 import 'package:medley/objects/user.dart';
 import 'package:medley/services/google_auth.dart';
+import 'package:medley/services/medley.dart';
 
 class UserData with ChangeNotifier {
   bool _isAuthenticated = false;
+  final AllPlaylists _allPlaylists = AllPlaylists([], [], [], []);
 
   UserAccount _user = UserAccount.blank();
   YoutubeAccount _yt = YoutubeAccount.blank();
@@ -13,20 +15,24 @@ class UserData with ChangeNotifier {
   final SoundcloudAccount _sc = SoundcloudAccount.blank();
 
   bool get isAuthenticated => _isAuthenticated;
+  AllPlaylists get allPlaylists => _allPlaylists;
   UserAccount get user => _user;
-  set user(UserAccount user) => _user;
   YoutubeAccount get youtubeAccount => _yt;
   SpotifyAccount get spotifyAccount => _sp;
   SoundcloudAccount get soundcloudAccount => _sc;
+  
+  set user(UserAccount user) => _user;
 
   Future<bool> login() async {
     _user = UserAccount(1, true, 'Test');
     _isAuthenticated = _user.isAuthenticated;
+    fetchPlaylists();
     return _isAuthenticated;
   }
 
   Future<bool> loginYoutube() async {
     _yt = await GoogleAuthService().signInToGoogle();
+    fetchPlaylists();
     notifyListeners();
     return _yt.isAuthenticated;
   }
@@ -81,5 +87,11 @@ class UserData with ChangeNotifier {
 
     notifyListeners();
     return false;
+  }
+
+  Future<AllPlaylists> fetchPlaylists() async {
+    _allPlaylists.youtube = await MedleyService().getYoutubePlaylists(this, scope: 'all');
+
+    return _allPlaylists;
   }
 }

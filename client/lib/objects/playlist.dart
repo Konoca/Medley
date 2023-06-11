@@ -4,80 +4,39 @@ import 'package:medley/objects/song.dart';
 class Playlist {
   final String title;
   final AudioPlatform platform;
-  final int id;
   final String listId;
+  final String imgUrl;
   final int numberOfTracks;
   final List<Song> songs;
 
   Playlist(
     this.title,
     this.platform,
-    this.id,
     this.listId,
+    this.imgUrl,
     this.numberOfTracks,
     this.songs,
   );
 
-  Playlist.test()
-      : title = 'Favorites',
-        platform = AudioPlatform.empty(),
-        id = 1,
-        listId = '',
-        numberOfTracks = 2,
-        songs = [
-          Song.test(),
-          Song.test2(),
-        ];
-
-  Playlist.test2()
-      : title = 'Liked Songs',
-        platform = AudioPlatform.soundcloud(),
-        id = 2,
-        listId = '',
-        numberOfTracks = 1,
-        songs = [
-          Song.test2(),
-        ];
-
-  Playlist.test3()
-      : title = 'Test',
-        platform = AudioPlatform.soundcloud(),
-        id = 3,
-        listId = '',
-        numberOfTracks = 2,
-        songs = [
-          Song.test3(),
-          Song.test2(),
-        ];
-
-  Playlist.test4()
-      : title = 'Test',
-        platform = AudioPlatform.soundcloud(),
-        id = 3,
-        listId = '',
-        numberOfTracks = 2,
-        songs = [
-          Song.test3(),
-          Song.test3(),
-        ];
-  
-  Playlist.test5()
-      : title = 'Test',
-        platform = AudioPlatform.soundcloud(),
-        id = 3,
-        listId = '',
-        numberOfTracks = 3,
-        songs = [
-          Song.test(),
-          Song.test2(),
-          Song.test3(),
-        ];
+  factory Playlist.fromJson(Map<String, dynamic> json) {
+    // List<Song> songs = Song.fromJsonList(json['songs']);
+    AudioPlatform platform = AudioPlatform.fromId(json['platform']);
+    List<Song> songs = json['songs'].map<Song>((s) => Song.fromJson(s, platform)).toList();
+    return Playlist(
+      json['playlist_name'],
+      platform,
+      json['playlist_id'],
+      json['thumbnail'], // TODO image url
+      songs.length,
+      songs,
+    );
+  }
 
   Playlist.empty()
       : title = '',
         platform = AudioPlatform.empty(),
-        id = 0,
         listId = '',
+        imgUrl = '',
         numberOfTracks = 0,
         songs = [];
 }
@@ -93,17 +52,17 @@ class AllPlaylists {
   AllPlaylists.fetch() {
     // TODO fetch playlist data
     custom = [
-      Playlist.test(),
-      Playlist.test2(),
-      Playlist.test3(),
-      Playlist.test4(),
-      Playlist.test5(),
+      // Playlist.test(),
+      // Playlist.test2(),
+      // Playlist.test3(),
+      // Playlist.test4(),
+      // Playlist.test5(),
     ];
     youtube = [
-      Playlist.test(),
-      Playlist.test2(),
-      Playlist.test(),
-      Playlist.test2(),
+      // Playlist.test(),
+      // Playlist.test2(),
+      // Playlist.test(),
+      // Playlist.test2(),
     ];
     spotify = [
       // Playlist.test(),
@@ -114,14 +73,14 @@ class AllPlaylists {
       // Playlist.test2(),
     ];
     soundcloud = [
-      Playlist.test(),
-      Playlist.test2(),
-      Playlist.test(),
-      Playlist.test2(),
-      Playlist.test(),
-      Playlist.test2(),
-      Playlist.test(),
-      Playlist.test2(),
+      // Playlist.test(),
+      // Playlist.test2(),
+      // Playlist.test(),
+      // Playlist.test2(),
+      // Playlist.test(),
+      // Playlist.test2(),
+      // Playlist.test(),
+      // Playlist.test2(),
     ];
   }
 }

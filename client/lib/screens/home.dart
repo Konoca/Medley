@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:medley/providers/user_provider.dart';
 
 import 'package:provider/provider.dart';
 import 'package:medley/providers/song_provider.dart';
@@ -30,7 +31,7 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           children: [
             const Spacer(),
-            Image(image: NetworkImage(pl.songs[0].imgUrl), height: playlistSize - 50),
+            Image(image: NetworkImage(pl.imgUrl), height: playlistSize - 50),
             Text(pl.title),
             Text(
               '${pl.numberOfTracks.toString()} tracks',
@@ -54,8 +55,7 @@ class _HomePageState extends State<HomePage> {
       columns = (width / (playlistSize+10)).floor();
     }
 
-    AllPlaylists playlists = AllPlaylists.fetch();
-    // context.watch<CurrentlyPlaying>().cachePlaylists(playlists);
+    AllPlaylists playlists = context.watch<UserData>().allPlaylists;
 
     if (playlists.custom.isNotEmpty) {
       w = platformList(w, playlists.custom, columns);

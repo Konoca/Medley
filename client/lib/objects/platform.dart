@@ -8,13 +8,13 @@ class AudioPlatform {
 
   // AudioPlatform(this.name, this.id, this.codec);
 
-  factory AudioPlatform.fromId(int id) {
-    switch (id) {
-      case 1:
+  factory AudioPlatform.fromId(id) {
+    switch (id.toString()) {
+      case '1':
         return AudioPlatform.youtube();
-      case 2:
+      case '2':
         return AudioPlatform.spotify();
-      case 3:
+      case '3':
         return AudioPlatform.soundcloud();
       default:
         return AudioPlatform.empty();

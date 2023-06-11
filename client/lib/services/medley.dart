@@ -3,28 +3,16 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'package:medley/objects/platform.dart';
+import 'package:medley/objects/playlist.dart';
+import 'package:medley/objects/song.dart';
+import 'package:medley/providers/user_provider.dart';
 
-import '../objects/song.dart';
+final String serverUrl = dotenv.env['SERVER_URL']!;
 
 class MedleyService {
-  Future<String> getStreamUrl(AudioPlatform platform, String id) async {
-    var url = Uri.http(
-      dotenv.env['SERVER_URL']!,
-      '/stream',
-      {
-        'platform': platform.id.toString(),
-        'id': id.toString(),
-        'codec': platform.codec.toString(),
-      },
-    );
-    var response = await http.get(url);
-    String streamUrl = (jsonDecode(response.body) as Map)['url'];
-    return streamUrl;
-  }
-
   Future<SongCache> getStreamUrlBulk(List<Song> songs, SongCache cache) async {
     final Uri url = Uri.http(
-      dotenv.env['SERVER_URL']!,
+      serverUrl,
       '/api/stream',
     );
 
@@ -51,5 +39,36 @@ class MedleyService {
     }
 
     return cache;
+  }
+
+  _getPlaylists(
+      String accessToken, AudioPlatform platform, String scope) async {
+    final Uri url = Uri.http(
+      serverUrl,
+      '/api/get_playlists',
+      {
+        'platform': platform.id.toString(),
+        'token': accessToken,
+        'scope': scope,
+      },
+    );
+
+    final response = await http.get(url);
+
+    List<Playlist> playlists = [];
+    for (Map<String, dynamic> pl in json.decode(response.body)) {
+      playlists.add(Playlist.fromJson(pl));
+    }
+
+    return playlists;
+  }
+
+  Future<List<Playlist>> getYoutubePlaylists(UserData user, {scope = ''}) async {
+    if (!user.youtubeAccount.isAuthenticated) return [];
+    return await _getPlaylists(
+      user.youtubeAccount.accessToken,
+      AudioPlatform.youtube(),
+      scope,
+    );
   }
 }

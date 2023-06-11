@@ -10,7 +10,7 @@ from flask import Flask, request, jsonify
 load_dotenv()
 
 SQL_USERNAME = os.getenv('SQL_USERNAME')
-SQL_PASSWORD = os.getenv('SQL_USERNAME')
+SQL_PASSWORD = os.getenv('SQL_PASSWORD')
 YOUTUBE_API_KEY = os.getenv('YOUTUBE_API_KEY')
 
 # Initialization
@@ -33,7 +33,7 @@ def stream():
 
         try:
             if platform == 1:
-                url = f'https://youtube.com/watch?v={id}'
+                url = f'https://youtube.com/watch?v={id}'  
             if platform == 3:
                 url = f'https://soundcloud.com/{id}'
             # TODO: Spotify support
@@ -50,6 +50,7 @@ def stream():
 def get_playlists():
     platform = request.args.get('platform')
     token = request.args.get('token')
+    scope = request.args.get('scope')
 
     try:
         headers = { 'Authorization': f'Bearer {token}' }
@@ -63,20 +64,38 @@ def get_playlists():
                 playlists_response = []
 
                 for item in playlists['items']:
-                    song_resp = requests.get(url + 'playlistItems', headers=headers, params={'part': 'snippet', 'playlistId': item['id']})
+                    songs_response = requests.get(url + 'playlistItems', headers=headers, params={'part': 'snippet', 'playlistId': item['id']})
 
-                    if song_resp.status_code == 200:
-                        songs = json.loads(song_resp.content)
+                    if songs_response.status_code == 200:
+                        songs = json.loads(songs_response.content)
+
+                        if scope == 'all': 
+                            songs_data = []
+                            for s in songs['items']:
+                                video_response = requests.get(url + 'videos', headers=headers, params={'part': 'snippet,contentDetails', 'id': s['snippet']['resourceId']['videoId']})
+                                if video_response.status_code == 200:
+                                    video = json.loads(video_response.content)
+
+                                    songs_data.append({
+                                        'song_id': s['snippet']['resourceId']['videoId'],
+                                        'song_title': s['snippet']['title'],
+                                        'artist': s['snippet']['videoOwnerChannelTitle'],
+                                        'duration': video['items'][0]['contentDetails']['duration']
+                                    })
+                                else:
+                                    return jsonify({'error': 'could not get song data'}), video_response.status_code
+                        else:
+                            songs_data = songs['pageInfo']['totalResults']
 
                         playlists_response.append({
                             'platform': platform,
                             'playlist_id': item['id'],
                             'playlist_name': item['snippet']['title'],
-                            'songs': songs['pageInfo']['totalResults'],
+                            'songs': songs_data,
                         })
                     else:
-                        return jsonify({'song error': song_resp.status_code})
-                return jsonify(playlists_response)
+                        return jsonify({'song error': songs_response.status_code})
+                return jsonify(playlists_response), 200
             else:
                 return jsonify({'playlist error': response.status_code})
             
@@ -90,18 +109,40 @@ def get_playlists():
                 playlists_response = []
 
                 for item in playlists['items']:
+                    id = item['id'] 
+
+                    if scope == 'all':
+                        songs_url = f'https://api.spotify.com/v1/playlists/{id}/tracks'
+                        songs_response = requests.get(songs_url, headers=headers)
+                        songs_data = []
+
+                        if songs_response.status_code == 200:
+                            songs = json.loads(songs_response.content)
+
+                            for song in songs['items']:
+                                songs_data.append({
+                                    'song_id': song['track']['id'],
+                                    'song_title': song['track']['name'],
+                                    'artist': song['track']['artists'][0]['name'],
+                                    'duration': song['track']['duration_ms']
+                                })
+                        else:
+                            return jsonify({'error': 'could not get song data'}), songs_response.status_code
+
+                    else:
+                        songs_data = item['tracks']['total']
+
                     playlists_response.append({
                             'platform': platform,
-                            'playlist_id': item['id'],
+                            'playlist_id': id,
                             'playlist_name': item['name'],
-                            'songs': item['tracks']['total'],
+                            'songs': songs_data,
                         })
                     
-                print(json.dumps(playlists_response, indent=2))
                 return jsonify(playlists_response)
             else:
                 return jsonify({'playlist error': response.status_code})
-        #TODO: Soundcloud support
+        # TODO: Soundcloud support
     except Exception as e:
         # TODO: Error handling
         print(e)

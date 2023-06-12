@@ -58,14 +58,12 @@ def get_playlists():
         if platform == '1':
             url = 'https://youtube.googleapis.com/youtube/v3/'
             response = requests.get(url + 'playlists', headers=headers, params={ 'part': 'snippet', 'mine': 'true' })
-
             if response.status_code == 200:
                 playlists = json.loads(response.content)
                 playlists_response = []
 
                 for item in playlists['items']:
                     songs_response = requests.get(url + 'playlistItems', headers=headers, params={'part': 'snippet', 'playlistId': item['id']})
-
                     if songs_response.status_code == 200:
                         songs = json.loads(songs_response.content)
 
@@ -78,14 +76,13 @@ def get_playlists():
                             video_response = requests.get(url + 'videos', headers=headers, params={'part': 'snippet,contentDetails', 'id': song_ids})
                             if video_response.status_code == 200:
                                 video = json.loads(video_response.content)
-
                                 for i in video['items']:
                                     songs_data.append({
                                         'song_id': i['id'],
                                         'song_title': i['snippet']['title'],
                                         'artist': i['snippet']['channelTitle'],
                                         'duration': i['contentDetails']['duration'],
-                                        'thumbnail': i['snippet']['thumbnails']['default']
+                                        'thumbnail': i['snippet']['thumbnails']['default']['url']
                                     })
                             else:
                                 return jsonify({'error': 'could not get song data'}), video_response.status_code
@@ -96,6 +93,7 @@ def get_playlists():
                             'platform': platform,
                             'playlist_id': item['id'],
                             'playlist_name': item['snippet']['title'],
+                            'thumbnail': item['snippet']['thumbnails']['default']['url'],
                             'songs': songs_data,
                         })
                     else:
@@ -124,12 +122,14 @@ def get_playlists():
 
                         if songs_response.status_code == 200:
                             songs = json.loads(songs_response.content)
+                            print(json.dumps(songs, indent=2))
 
                             for song in songs['items']:
                                 songs_data.append({
                                     'song_id': song['track']['id'],
                                     'song_title': song['track']['name'],
                                     'artist': song['track']['artists'][0]['name'],
+                                    'thumbnail': song['images'][0]['url'],
                                     'duration': song['track']['duration_ms']
                                 })
                         else:
@@ -142,6 +142,7 @@ def get_playlists():
                             'platform': platform,
                             'playlist_id': id,
                             'playlist_name': item['name'],
+                            'thumbnail': item['images'][0]['url'],
                             'songs': songs_data,
                         })
                     
@@ -177,7 +178,6 @@ def get_songs():
 
                     if video_resp.status_code == 200:
                         video = json.loads(video_resp.content)
-                        print(json.dumps(video, indent=2))
 
                         songs_response.append({
                             'platform': platform,

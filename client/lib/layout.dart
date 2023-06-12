@@ -2,8 +2,10 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:medley/components/image.dart';
 
 import 'package:medley/components/media_controls.dart';
+import 'package:medley/components/text.dart';
 import 'package:medley/objects/platform.dart';
 import 'package:medley/objects/song.dart';
 
@@ -175,30 +177,31 @@ class _PageLayoutState extends State<PageLayout> {
           padding: const EdgeInsets.only(top: 40),
           child: Column(
             children: [
-              Image(
-                image: NetworkImage(
-                  context.watch<CurrentlyPlaying>().song.imgUrl,
-                ),
-                height: 300,
+              SquareImage(
+                NetworkImage(context.watch<CurrentlyPlaying>().song.imgUrl),
+                300,
               ),
               Container(
                 alignment: Alignment.center,
                 width: double.infinity,
-                child: Text(
+                child: ScrollingText(
                   context.watch<CurrentlyPlaying>().song.title,
-                  overflow: TextOverflow.fade,
+                  width: MediaQuery.of(context).size.width * 0.9,
                   style: const TextStyle(fontSize: 40),
+                  textAlign: TextAlign.center,
                 ),
               ),
               Container(
                 alignment: Alignment.center,
                 width: double.infinity,
-                child: Text(
+                child: ScrollingText(
                   context.watch<CurrentlyPlaying>().song.artist,
+                  width: MediaQuery.of(context).size.width * 0.9,
                   style: const TextStyle(
                     color: Color(0x80FFFFFF),
                     fontSize: 20,
                   ),
+                  textAlign: TextAlign.center,
                 ),
               ),
               Container(

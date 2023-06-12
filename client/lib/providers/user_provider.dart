@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:medley/objects/platform.dart';
 import 'package:medley/objects/playlist.dart';
 
 import 'package:medley/objects/user.dart';
@@ -23,6 +24,15 @@ class UserData with ChangeNotifier {
   
   set user(UserAccount user) => _user;
 
+  String getToken(AudioPlatform platform) {
+    switch (platform.id) {
+      case 1:
+        return _yt.accessToken;
+      default:
+        return '';
+    }
+  }
+
   Future<bool> login() async {
     _user = UserAccount(1, true, 'Test');
     _isAuthenticated = _user.isAuthenticated;
@@ -32,6 +42,13 @@ class UserData with ChangeNotifier {
 
   Future<bool> loginYoutube() async {
     _yt = await GoogleAuthService().signInToGoogle();
+    fetchPlaylists();
+    notifyListeners();
+    return _yt.isAuthenticated;
+  }
+
+  Future<bool> logoutYoutube() async {
+    _yt = YoutubeAccount.blank();
     fetchPlaylists();
     notifyListeners();
     return _yt.isAuthenticated;
@@ -91,7 +108,14 @@ class UserData with ChangeNotifier {
 
   Future<AllPlaylists> fetchPlaylists() async {
     _allPlaylists.youtube = await MedleyService().getYoutubePlaylists(this, scope: 'all');
-
+    notifyListeners();
     return _allPlaylists;
+  }
+
+  void updatePlaylist(Playlist playlist) async {
+    String token = getToken(playlist.platform);
+    playlist = await MedleyService().getSongs(token, playlist);
+    _allPlaylists.updatePlaylistSongs(playlist);
+    notifyListeners();
   }
 }

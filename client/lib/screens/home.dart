@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:medley/components/image.dart';
+import 'package:medley/components/text.dart';
 import 'package:medley/providers/user_provider.dart';
 
 import 'package:provider/provider.dart';
@@ -17,7 +19,11 @@ class _HomePageState extends State<HomePage> {
 
   Widget createTile(Playlist pl) {
     return InkWell(
-      onTap: () => context.read<CurrentlyPlaying>().setPlaylist(pl),
+      onTap: () {
+        // TODO open select song page
+        if (pl.songs.isEmpty) context.read<UserData>().updatePlaylist(pl);
+        if (pl.songs.isNotEmpty) context.read<CurrentlyPlaying>().setPlaylist(pl);
+      },
       borderRadius: BorderRadius.circular(15),
       child: Container(
         decoration: BoxDecoration(
@@ -31,8 +37,14 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           children: [
             const Spacer(),
-            Image(image: NetworkImage(pl.imgUrl), height: playlistSize - 50),
-            Text(pl.title),
+            SquareImage(
+              NetworkImage(pl.imgUrl),
+              playlistSize - 50,
+            ),
+            ScrollingText(
+              pl.title,
+              padding: const EdgeInsets.symmetric(horizontal: 15),
+            ),
             Text(
               '${pl.numberOfTracks.toString()} tracks',
               style: const TextStyle(
@@ -48,11 +60,11 @@ class _HomePageState extends State<HomePage> {
   List<Widget> fetchPlaylists(BuildContext context) {
     List<Widget> w = [];
     double width = MediaQuery.of(context).size.width;
-    int columns = (width / (playlistSize+10)).floor();
+    int columns = (width / (playlistSize + 10)).floor();
 
     while (columns < 2) {
       setState(() => playlistSize -= 10);
-      columns = (width / (playlistSize+10)).floor();
+      columns = (width / (playlistSize + 10)).floor();
     }
 
     AllPlaylists playlists = context.watch<UserData>().allPlaylists;

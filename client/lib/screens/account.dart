@@ -10,12 +10,11 @@ class AccountPage extends StatefulWidget {
   State<AccountPage> createState() => _AccountPageState();
 }
 
-Widget accountCard(String name, Account account, Function onTap) {
+Widget accountCard(String name, Account account, Function onTapAuth, Function onTapDeAuth) {
   return InkWell(
     onTap: () {
-      if (!account.isAuthenticated) {
-        onTap();
-      }
+      if (!account.isAuthenticated) onTapAuth();
+      if (account.isAuthenticated) onTapDeAuth();
     },
     child: Container(
       decoration: BoxDecoration(
@@ -55,21 +54,25 @@ class _AccountPageState extends State<AccountPage> {
           'Medley',
           userData.user,
           () {},
+          () {},
         ),
         accountCard(
           'Youtube',
           userData.youtubeAccount,
           () async => await userData.loginYoutube(),
+          () async => await userData.logoutYoutube(),
         ),
         accountCard(
           'Spotify',
           userData.spotifyAccount,
           () async => await userData.loginSpotify(context),
+          () {},
         ),
         accountCard(
           'Soundcloud',
           userData.soundcloudAccount,
           () async => await userData.loginSoundcloud(context),
+          () {},
         ),
       ],
     );

@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'package:medley/components/image.dart';
+import 'package:medley/components/text.dart';
 
 import 'package:medley/providers/song_provider.dart';
 import 'package:provider/provider.dart';
@@ -93,20 +95,22 @@ class _NowPlayingState extends State<NowPlaying> {
 
     return Row(
       children: [
-        Image(
-          image: NetworkImage(
-            context.watch<CurrentlyPlaying>().song.imgUrl,
-          ),
-          height: 75,
+        SquareImage(
+          NetworkImage(context.watch<CurrentlyPlaying>().song.imgUrl),
+          74,
         ),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 10),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(context.watch<CurrentlyPlaying>().song.title),
-              Text(
+              ScrollingText(
+                context.watch<CurrentlyPlaying>().song.title,
+                width: MediaQuery.of(context).size.width / 2,
+              ),
+              ScrollingText(
                 context.watch<CurrentlyPlaying>().song.artist,
+                width: MediaQuery.of(context).size.width / 2,
                 style: const TextStyle(
                   color: Color(0x80FFFFFF),
                 ),

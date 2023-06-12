@@ -7,7 +7,7 @@ class Playlist {
   final String listId;
   final String imgUrl;
   final int numberOfTracks;
-  final List<Song> songs;
+  List<Song> songs;
 
   Playlist(
     this.title,
@@ -18,8 +18,7 @@ class Playlist {
     this.songs,
   );
 
-  factory Playlist.fromJson(Map<String, dynamic> json) {
-    // List<Song> songs = Song.fromJsonList(json['songs']);
+  factory Playlist.fromJsonWithSongs(Map<String, dynamic> json) {
     AudioPlatform platform = AudioPlatform.fromId(json['platform']);
     List<Song> songs = json['songs'].map<Song>((s) => Song.fromJson(s, platform)).toList();
     return Playlist(
@@ -29,6 +28,18 @@ class Playlist {
       json['thumbnail'], // TODO image url
       songs.length,
       songs,
+    );
+  }
+
+  factory Playlist.fromJson(Map<String, dynamic> json) {
+    AudioPlatform platform = AudioPlatform.fromId(json['platform']);
+    return Playlist(
+      json['playlist_name'],
+      platform,
+      json['playlist_id'],
+      json['thumbnail'], // TODO image url
+      json['songs'],
+      [],
     );
   }
 
@@ -48,6 +59,19 @@ class AllPlaylists {
   List<Playlist> soundcloud = [];
 
   AllPlaylists(this.custom, this.youtube, this.spotify, this.soundcloud);
+
+  void updatePlaylistSongs(Playlist playlist) {
+    switch (playlist.platform.id) {
+      case 1:
+        youtube.where((pl) => playlist.listId == pl.listId).first.songs = playlist.songs;
+        break;
+      case 2:
+        break;
+      case 3:
+        break;
+      default:
+    }
+  }
 
   AllPlaylists.fetch() {
     // TODO fetch playlist data

@@ -41,15 +41,13 @@ class MedleyService {
     return cache;
   }
 
-  _getPlaylists(
-      String accessToken, AudioPlatform platform, String scope) async {
+  _getPlaylists(String accessToken, AudioPlatform platform) async {
     final Uri url = Uri.http(
       serverUrl,
       '/api/get_playlists',
       {
         'platform': platform.id.toString(),
         'token': accessToken,
-        'scope': scope,
       },
     );
 
@@ -63,12 +61,43 @@ class MedleyService {
     return playlists;
   }
 
-  Future<List<Playlist>> getYoutubePlaylists(UserData user, {scope = ''}) async {
+  Future<Playlist> getSongs(String accessToken, Playlist playlist) async {
+    final Uri url = Uri.http(
+      serverUrl,
+      '/api/get_songs',
+      {
+        'platform': playlist.platform.id.toString(),
+        'token': accessToken,
+        'playlistId': playlist.listId,
+      },
+    );
+
+    final response = await http.get(url);
+
+    playlist.songs = json
+        .decode(response.body)
+        .map<Song>((s) => Song.fromJson(s, playlist.platform))
+        .toList();
+
+    return playlist;
+  }
+
+  Future<List<Playlist>> getYoutubePlaylists(UserData user,
+      {scope = ''}) async {
     if (!user.youtubeAccount.isAuthenticated) return [];
     return await _getPlaylists(
       user.youtubeAccount.accessToken,
       AudioPlatform.youtube(),
-      scope,
     );
   }
+
+  // Future<Playlist> getYoutubePlaylistSongs(
+  //     UserData user, Playlist playlist) async {
+  //   if (!user.youtubeAccount.isAuthenticated) return playlist;
+  //   return await _getSongs(
+  //     user.youtubeAccount.accessToken,
+  //     AudioPlatform.youtube(),
+  //     playlist,
+  //   );
+  // }
 }

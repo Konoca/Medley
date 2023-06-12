@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:medley/components/image.dart';
+import 'package:medley/components/text.dart';
+import 'package:medley/providers/user_provider.dart';
 
 import 'package:provider/provider.dart';
 import 'package:medley/providers/song_provider.dart';
@@ -16,7 +19,11 @@ class _HomePageState extends State<HomePage> {
 
   Widget createTile(Playlist pl) {
     return InkWell(
-      onTap: () => context.read<CurrentlyPlaying>().setPlaylist(pl),
+      onTap: () {
+        // TODO open select song page
+        if (pl.songs.isEmpty) context.read<UserData>().updatePlaylist(pl);
+        if (pl.songs.isNotEmpty) context.read<CurrentlyPlaying>().setPlaylist(pl);
+      },
       borderRadius: BorderRadius.circular(15),
       child: Container(
         decoration: BoxDecoration(
@@ -29,33 +36,38 @@ class _HomePageState extends State<HomePage> {
         padding: const EdgeInsets.symmetric(vertical: 5),
         child: Column(
           children: [
-            // const Spacer(),
             const Spacer(),
-            Image(image: NetworkImage(pl.songs[0].imgUrl), height: playlistSize - 50),
-            Text(pl.title),
+            SquareImage(
+              NetworkImage(pl.imgUrl),
+              playlistSize - 50,
+            ),
+            ScrollingText(
+              pl.title,
+              padding: const EdgeInsets.symmetric(horizontal: 15),
+            ),
             Text(
               '${pl.numberOfTracks.toString()} tracks',
               style: const TextStyle(
                 color: Color(0x80FFFFFF),
               ),
             ),
-            // const Spacer(),
           ],
         ),
       ),
     );
   }
 
-  List<Widget> fetchPlaylists(double width) {
+  List<Widget> fetchPlaylists(BuildContext context) {
     List<Widget> w = [];
-    int columns = (width / (playlistSize+10)).floor();
+    double width = MediaQuery.of(context).size.width;
+    int columns = (width / (playlistSize + 10)).floor();
 
     while (columns < 2) {
       setState(() => playlistSize -= 10);
-      columns = (width / (playlistSize+10)).floor();
+      columns = (width / (playlistSize + 10)).floor();
     }
 
-    AllPlaylists playlists = AllPlaylists.fetch();
+    AllPlaylists playlists = context.watch<UserData>().allPlaylists;
 
     if (playlists.custom.isNotEmpty) {
       w = platformList(w, playlists.custom, columns);
@@ -99,21 +111,15 @@ class _HomePageState extends State<HomePage> {
   Widget platformLabel(String asset, String name) {
     return Row(
       children: [
-        // Icon(
-        //   icon,
-        //   color: Colors.black,
-        //   size: 40,
-        // ),
         Image.asset(
           asset,
           height: 40,
-          // color: const Color(0xFF1E1E1E),
-          color: Colors.black,
+          color: Colors.white,
         ),
         Text(
           name,
           style: const TextStyle(
-            color: Colors.black,
+            color: Colors.white,
             fontSize: 40,
             fontWeight: FontWeight.bold,
           ),
@@ -127,7 +133,7 @@ class _HomePageState extends State<HomePage> {
     return ListView(
       padding: const EdgeInsets.all(5),
       scrollDirection: Axis.vertical,
-      children: fetchPlaylists(MediaQuery.of(context).size.width),
+      children: fetchPlaylists(context),
     );
   }
 }

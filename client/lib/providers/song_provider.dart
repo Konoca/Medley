@@ -4,6 +4,8 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:medley/objects/song.dart';
 import 'package:medley/objects/playlist.dart';
 
+import '../services/medley.dart';
+
 class CurrentlyPlaying with ChangeNotifier {
   bool _display = false;
   bool _isPlaying = false;
@@ -14,15 +16,16 @@ class CurrentlyPlaying with ChangeNotifier {
 
   Song _song = Song.empty();
   Playlist _playlist = Playlist.empty();
+  late AllPlaylists _allPlaylists;
 
   final AudioPlayer _player = AudioPlayer();
   final Random _rng = Random();
 
   List<Song> _queue = [];
+  final List<int> _queueIdxHistory = [];
   int _queueIndex = -1;
   int _nextIndex = -1;
-  String _currentUrl = '';
-  String _cachedUrl = '';
+  SongCache _cache = SongCache();
 
   bool get display => _display;
   bool get isPlaying => _isPlaying;
@@ -32,33 +35,35 @@ class CurrentlyPlaying with ChangeNotifier {
   Song get song => _song;
   Playlist get playlist => _playlist;
   AudioPlayer get player => _player;
+  SongCache get cache => _cache;
+  AllPlaylists get allPlaylists => _allPlaylists;
 
   // TODO implement
   void setSong() {}
 
-  void playSong() async {
+  void playSong({addQueueIndex=true}) async {
     _display = true;
     _isPlaying = true;
     _song = _queue[_nextIndex];
+    if (_queueIndex != -1 && addQueueIndex == true) _queueIdxHistory.add(_queueIndex);
     _queueIndex = _nextIndex;
 
     if (_player.state == PlayerState.playing) _player.stop();
 
-    if (_cachedUrl == '') {
-      if (_currentUrl == '') _currentUrl = await _song.url;
-      _player.play(UrlSource(_currentUrl));
-    } else {
-      _player.play(UrlSource(_cachedUrl));
-      _currentUrl = _cachedUrl;
-      _cachedUrl = '';
+    String url = _cache.get(_song);
+
+    if (url == '') {
+      _cache = await MedleyService().getStreamUrlBulk(_queue, _cache);
+      url = _cache.get(_song);
     }
+    
+    _player.play(UrlSource(url));
 
-    _cacheNext();
-
+    _determineNextIndex();
     notifyListeners();
   }
 
-  void setPlaylist(Playlist pl) {
+  void setPlaylist(Playlist pl) async {
     if (_player.state == PlayerState.playing) _player.stop();
 
     _playlist = pl;
@@ -68,8 +73,6 @@ class CurrentlyPlaying with ChangeNotifier {
     _queue = _playlist.songs;
     _queueIndex = -1;
     _nextIndex = -1;
-    _cachedUrl = '';
-    _currentUrl = '';
 
     _determineNextIndex();
 
@@ -79,10 +82,8 @@ class CurrentlyPlaying with ChangeNotifier {
 
   void nextSong() {
     if (_queue.isEmpty) return;
-    if (_progress.inSeconds < 3) return;
 
     if (_loop) {
-      _cachedUrl = _currentUrl;
       _nextIndex = _queueIndex;
     }
 
@@ -91,11 +92,11 @@ class CurrentlyPlaying with ChangeNotifier {
 
   void prevSong() {
     if (_queue.isEmpty) return;
-    if (_progress.inSeconds < 3) return;
 
-    _cachedUrl = _currentUrl;
     _nextIndex = _queueIndex;
-    playSong();
+    if (_progress.inSeconds <= 3 && _queueIdxHistory.isNotEmpty) _nextIndex = _queueIdxHistory.removeLast();
+
+    playSong(addQueueIndex: false);
   }
 
   void togglePlaying() async {
@@ -108,13 +109,11 @@ class CurrentlyPlaying with ChangeNotifier {
 
   void toggleShuffle() async {
     _shuffle = !_shuffle;
-    if (_queue.isNotEmpty) _cacheNext();
     notifyListeners();
   }
 
   void toggleLoop() {
     _loop = !_loop;
-    if (_queue.isEmpty) _cacheNext();
     notifyListeners();
   }
 
@@ -126,6 +125,12 @@ class CurrentlyPlaying with ChangeNotifier {
 
   void setProgress(Duration progress) {
     _progress = progress;
+    notifyListeners();
+  }
+
+  void seek(Duration progress) {
+    _progress = progress;
+    _player.seek(progress);
     notifyListeners();
   }
 
@@ -149,10 +154,5 @@ class CurrentlyPlaying with ChangeNotifier {
     }
 
     _nextIndex = 0;
-  }
-
-  void _cacheNext() async {
-    _determineNextIndex();
-    _cachedUrl = await _queue[_nextIndex].url;
   }
 }

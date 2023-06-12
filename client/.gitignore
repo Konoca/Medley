@@ -44,3 +44,9 @@ app.*.map.json
 /android/app/release
 
 *.env
+
+# Contain secrets
+**/ios/Runner/GoogleService-Info.plist
+**/ios/Runner/Info.plist
+**/android/google-services.json
+**/web/index.html

@@ -88,12 +88,13 @@ class _NowPlayingState extends State<NowPlaying> {
     if (!context.watch<CurrentlyPlaying>().display) {
       return Container(
         height: 75,
-        width: 190,
+        width: 264,
         padding: const EdgeInsets.symmetric(horizontal: 10),
       );
     }
 
     return Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
         SquareImage(
           NetworkImage(context.watch<CurrentlyPlaying>().song.imgUrl),
@@ -101,16 +102,17 @@ class _NowPlayingState extends State<NowPlaying> {
         ),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 10),
+          width: isMobile() ? MediaQuery.of(context).size.width / 2 : 190,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               ScrollingText(
                 context.watch<CurrentlyPlaying>().song.title,
-                width: MediaQuery.of(context).size.width / 2,
+                width: isMobile() ? MediaQuery.of(context).size.width / 2 : 190,
               ),
               ScrollingText(
                 context.watch<CurrentlyPlaying>().song.artist,
-                width: MediaQuery.of(context).size.width / 2,
+                width: isMobile() ? MediaQuery.of(context).size.width / 2 : 190,
                 style: const TextStyle(
                   color: Color(0x80FFFFFF),
                 ),
@@ -177,6 +179,7 @@ class _VolumeState extends State<Volume> {
       height: 75,
       child: Row(
         children: [
+          Container(width: 48),
           const Icon(Icons.volume_up),
           Slider(
             activeColor: Colors.white,

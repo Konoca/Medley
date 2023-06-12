@@ -11,6 +11,7 @@ import 'package:medley/objects/user.dart';
 
 const scopes = [
   'https://www.googleapis.com/auth/youtube.readonly',
+  'https://www.googleapis.com/auth/userinfo.profile',
 ];
 
 class GoogleAuthService {
@@ -21,6 +22,7 @@ class GoogleAuthService {
       }
       return await _desktopLogin();
     } catch (e) {
+      print(e);
       return YoutubeAccount.blank();
     }
   }

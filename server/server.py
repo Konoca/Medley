@@ -71,19 +71,24 @@ def get_playlists():
 
                         if scope == 'all': 
                             songs_data = []
-                            for s in songs['items']:
-                                video_response = requests.get(url + 'videos', headers=headers, params={'part': 'snippet,contentDetails', 'id': s['snippet']['resourceId']['videoId']})
-                                if video_response.status_code == 200:
-                                    video = json.loads(video_response.content)
+                            song_ids = []
+                            for i in songs['items']:
+                                song_ids.append(i['snippet']['resourceId']['videoId'])
 
+                            video_response = requests.get(url + 'videos', headers=headers, params={'part': 'snippet,contentDetails', 'id': song_ids})
+                            if video_response.status_code == 200:
+                                video = json.loads(video_response.content)
+
+                                for i in video['items']:
                                     songs_data.append({
-                                        'song_id': s['snippet']['resourceId']['videoId'],
-                                        'song_title': s['snippet']['title'],
-                                        'artist': s['snippet']['videoOwnerChannelTitle'],
-                                        'duration': video['items'][0]['contentDetails']['duration']
+                                        'song_id': i['id'],
+                                        'song_title': i['snippet']['title'],
+                                        'artist': i['snippet']['channelTitle'],
+                                        'duration': i['contentDetails']['duration'],
+                                        'thumbnail': i['snippet']['thumbnails']['default']
                                     })
-                                else:
-                                    return jsonify({'error': 'could not get song data'}), video_response.status_code
+                            else:
+                                return jsonify({'error': 'could not get song data'}), video_response.status_code
                         else:
                             songs_data = songs['pageInfo']['totalResults']
 
@@ -101,6 +106,7 @@ def get_playlists():
             
         elif platform == '2':
             user = request.args.get('user') # will get from users table
+
             url = f'https://api.spotify.com/v1/users/{user}/playlists'
             response = requests.get(url, headers=headers)
 
@@ -171,13 +177,15 @@ def get_songs():
 
                     if video_resp.status_code == 200:
                         video = json.loads(video_resp.content)
+                        print(json.dumps(video, indent=2))
 
                         songs_response.append({
                             'platform': platform,
                             'song_id': item['snippet']['resourceId']['videoId'],
                             'song_title': item['snippet']['title'],
                             'artist': item['snippet']['videoOwnerChannelTitle'],
-                            'duration': video['items'][0]['contentDetails']['duration']
+                            'duration': video['items'][0]['contentDetails']['duration'],
+                            'thumbnail': item['snippet']['thumbnails']['default']
                         })
                     else:
                         return jsonify({'error': 'could not get song length'}), 404

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:medley/components/image.dart';
 import 'package:medley/components/text.dart';
+import 'package:medley/providers/page_provider.dart';
 import 'package:medley/providers/user_provider.dart';
 
 import 'package:provider/provider.dart';
@@ -20,9 +21,8 @@ class _HomePageState extends State<HomePage> {
   Widget createTile(Playlist pl) {
     return InkWell(
       onTap: () {
-        // TODO open select song page
-        if (pl.songs.isEmpty) context.read<UserData>().updatePlaylist(pl);
-        if (pl.songs.isNotEmpty) context.read<CurrentlyPlaying>().setPlaylist(pl);
+        context.read<CurrentPage>().setPlaylist(pl);
+        context.read<CurrentPage>().setPageIndex(3);
       },
       borderRadius: BorderRadius.circular(15),
       child: Container(
@@ -68,6 +68,16 @@ class _HomePageState extends State<HomePage> {
     }
 
     AllPlaylists playlists = context.watch<UserData>().allPlaylists;
+
+    if (playlists.isEmpty()) {
+      return [
+        Container(
+          alignment: Alignment.center,
+          height: 500,
+          child: const Text('Get started by linking an account!', style: TextStyle(color: Color(0xFF1E1E1E)),)
+        )
+      ];
+    }
 
     if (playlists.custom.isNotEmpty) {
       w = platformList(w, playlists.custom, columns);

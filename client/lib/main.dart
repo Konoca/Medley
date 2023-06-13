@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'package:medley/layout.dart';
+import 'package:medley/providers/page_provider.dart';
 import 'package:medley/providers/song_provider.dart';
 import 'package:medley/providers/user_provider.dart';
 import 'package:provider/provider.dart';
@@ -21,6 +22,7 @@ Future<void> main() async {
     providers: [
       ChangeNotifierProvider(create: (_) => CurrentlyPlaying()),
       ChangeNotifierProvider(create: (_) => UserData()),
+      ChangeNotifierProvider(create: (_) => CurrentPage()),
     ],
     child: const MyApp(),
   ));

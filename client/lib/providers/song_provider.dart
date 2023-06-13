@@ -26,6 +26,7 @@ class CurrentlyPlaying with ChangeNotifier {
   int _queueIndex = -1;
   int _nextIndex = -1;
   SongCache _cache = SongCache();
+  bool _isCaching = false;
 
   bool get display => _display;
   bool get isPlaying => _isPlaying;
@@ -36,10 +37,8 @@ class CurrentlyPlaying with ChangeNotifier {
   Playlist get playlist => _playlist;
   AudioPlayer get player => _player;
   SongCache get cache => _cache;
+  bool get isCaching => _isCaching;
   AllPlaylists get allPlaylists => _allPlaylists;
-
-  // TODO implement
-  void setSong() {}
 
   void playSong({addQueueIndex=true}) async {
     _display = true;
@@ -53,8 +52,10 @@ class CurrentlyPlaying with ChangeNotifier {
     String url = _cache.get(_song);
 
     if (url == '') {
+      _setCaching(true);
       _cache = await MedleyService().getStreamUrlBulk(_queue, _cache);
       url = _cache.get(_song);
+      _setCaching(false);
     }
     
     _player.play(UrlSource(url));
@@ -63,7 +64,7 @@ class CurrentlyPlaying with ChangeNotifier {
     notifyListeners();
   }
 
-  void setPlaylist(Playlist pl) async {
+  void setPlaylist(Playlist pl, {Song? song}) async {
     if (_player.state == PlayerState.playing) _player.stop();
 
     _playlist = pl;
@@ -71,10 +72,10 @@ class CurrentlyPlaying with ChangeNotifier {
     _isPlaying = true;
 
     _queue = _playlist.songs;
-    _queueIndex = -1;
-    _nextIndex = -1;
+    _queueIndex = song != null ? _playlist.findSongIndex(song) : -1;
+    _nextIndex = song != null ? _playlist.findSongIndex(song) : -1;
 
-    _determineNextIndex();
+    if (song != null) _determineNextIndex();
 
     playSong();
     notifyListeners();
@@ -109,6 +110,7 @@ class CurrentlyPlaying with ChangeNotifier {
 
   void toggleShuffle() async {
     _shuffle = !_shuffle;
+    _determineNextIndex();
     notifyListeners();
   }
 
@@ -154,5 +156,11 @@ class CurrentlyPlaying with ChangeNotifier {
     }
 
     _nextIndex = 0;
+    notifyListeners();
+  }
+
+  void _setCaching(bool c) {
+    _isCaching = c;
+    notifyListeners();
   }
 }

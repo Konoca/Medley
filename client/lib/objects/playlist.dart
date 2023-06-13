@@ -50,6 +50,10 @@ class Playlist {
         imgUrl = '',
         numberOfTracks = 0,
         songs = [];
+
+  int findSongIndex(Song song) {
+    return songs.indexOf(song) - 1;
+  }
 }
 
 class AllPlaylists {
@@ -73,38 +77,7 @@ class AllPlaylists {
     }
   }
 
-  AllPlaylists.fetch() {
-    // TODO fetch playlist data
-    custom = [
-      // Playlist.test(),
-      // Playlist.test2(),
-      // Playlist.test3(),
-      // Playlist.test4(),
-      // Playlist.test5(),
-    ];
-    youtube = [
-      // Playlist.test(),
-      // Playlist.test2(),
-      // Playlist.test(),
-      // Playlist.test2(),
-    ];
-    spotify = [
-      // Playlist.test(),
-      // Playlist.test2(),
-      // Playlist.test(),
-      // Playlist.test2(),
-      // Playlist.test(),
-      // Playlist.test2(),
-    ];
-    soundcloud = [
-      // Playlist.test(),
-      // Playlist.test2(),
-      // Playlist.test(),
-      // Playlist.test2(),
-      // Playlist.test(),
-      // Playlist.test2(),
-      // Playlist.test(),
-      // Playlist.test2(),
-    ];
+  bool isEmpty() {
+    return (custom.isEmpty && youtube.isEmpty && spotify.isEmpty && soundcloud.isEmpty);
   }
 }

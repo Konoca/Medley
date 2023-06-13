@@ -21,7 +21,7 @@ class UserData with ChangeNotifier {
   YoutubeAccount get youtubeAccount => _yt;
   SpotifyAccount get spotifyAccount => _sp;
   SoundcloudAccount get soundcloudAccount => _sc;
-  
+
   set user(UserAccount user) => _user;
 
   String getToken(AudioPlatform platform) {
@@ -47,10 +47,40 @@ class UserData with ChangeNotifier {
     return _yt.isAuthenticated;
   }
 
-  Future<bool> logoutYoutube() async {
-    _yt = YoutubeAccount.blank();
-    fetchPlaylists();
-    notifyListeners();
+  Future<bool> logoutYoutube(BuildContext context) async {
+    showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text('Are you sure'),
+            content: const Text(
+                'Are you sure you want to log out of your youtube account?'),
+            actions: <Widget>[
+              TextButton(
+                style: TextButton.styleFrom(
+                  textStyle: Theme.of(context).textTheme.labelLarge,
+                ),
+                child: const Text('Yes'),
+                onPressed: () {
+                  _yt = YoutubeAccount.blank();
+                  fetchPlaylists();
+                  notifyListeners();
+                  Navigator.of(context).pop();
+                },
+              ),
+              TextButton(
+                style: TextButton.styleFrom(
+                  textStyle: Theme.of(context).textTheme.labelLarge,
+                ),
+                child: const Text('Cancel'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        });
+
     return _yt.isAuthenticated;
   }
 
@@ -107,7 +137,8 @@ class UserData with ChangeNotifier {
   }
 
   Future<AllPlaylists> fetchPlaylists() async {
-    _allPlaylists.youtube = await MedleyService().getYoutubePlaylists(this, scope: 'all');
+    _allPlaylists.youtube =
+        await MedleyService().getYoutubePlaylists(this, scope: 'all');
     notifyListeners();
     return _allPlaylists;
   }

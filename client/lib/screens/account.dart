@@ -60,7 +60,7 @@ class _AccountPageState extends State<AccountPage> {
           'Youtube',
           userData.youtubeAccount,
           () async => await userData.loginYoutube(),
-          () async => await userData.logoutYoutube(),
+          () async => await userData.logoutYoutube(context),
         ),
         accountCard(
           'Spotify',

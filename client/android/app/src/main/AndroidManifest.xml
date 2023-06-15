@@ -32,10 +32,10 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
-        <receiver android:name="com.ryanheise.audioservice.MediaButtonReceiver" >
-        <intent-filter>
-            <action android:name="android.intent.action.MEDIA_BUTTON" />
-        </intent-filter>
-        </receiver> 
+        <!-- <receiver android:name="com.ryanheise.audioservice.MediaButtonReceiver" > -->
+        <!-- <intent-filter> -->
+        <!--     <action android:name="android.intent.action.MEDIA_BUTTON" /> -->
+        <!-- </intent-filter> -->
+        <!-- </receiver>  -->
     </application>
 </manifest>

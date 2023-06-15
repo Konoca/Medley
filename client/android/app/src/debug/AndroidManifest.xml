@@ -4,9 +4,9 @@
          to allow setting breakpoints, to provide hot reload, etc.
     -->
     <uses-permission android:name="android.permission.INTERNET"/>
-    <receiver android:name="com.ryanheise.audioservice.MediaButtonReceiver" >
-      <intent-filter>
-        <action android:name="android.intent.action.MEDIA_BUTTON" />
-      </intent-filter>
-    </receiver> 
+    <!-- <receiver android:name="com.ryanheise.audioservice.MediaButtonReceiver" > -->
+    <!--   <intent-filter> -->
+    <!--     <action android:name="android.intent.action.MEDIA_BUTTON" /> -->
+    <!--   </intent-filter> -->
+    <!-- </receiver>  -->
 </manifest>

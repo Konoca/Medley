@@ -8,8 +8,10 @@ import 'package:medley/components/media_controls.dart';
 import 'package:medley/components/text.dart';
 import 'package:medley/objects/platform.dart';
 import 'package:medley/objects/song.dart';
+import 'package:medley/providers/page_provider.dart';
 
 import 'package:medley/screens/home.dart';
+import 'package:medley/screens/playlist.dart';
 import 'package:medley/screens/search.dart';
 import 'package:medley/screens/account.dart';
 
@@ -24,14 +26,15 @@ class PageLayout extends StatefulWidget {
 }
 
 class _PageLayoutState extends State<PageLayout> {
-  int pageIndex = 0;
   double progress = 0;
   Duration songDuration = Duration.zero;
 
   Widget selectPage(BuildContext ctx) {
+    int pageIndex = context.watch<CurrentPage>().pageIndex;
     Widget p = const HomePage();
     if (pageIndex == 1) p = const SearchPage();
     if (pageIndex == 2) p = const AccountPage();
+    if (pageIndex == 3) p = const PlaylistPage();
     return Container(
       padding: const EdgeInsets.only(top: 50),
       child: Column(
@@ -127,6 +130,7 @@ class _PageLayoutState extends State<PageLayout> {
   }
 
   Widget mobileLayout() {
+    int pageIndex = context.watch<CurrentPage>().pageIndex;
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: selectPage(context),
@@ -147,11 +151,9 @@ class _PageLayoutState extends State<PageLayout> {
             label: 'Accounts',
           ),
         ],
-        currentIndex: pageIndex,
+        currentIndex: pageIndex < 3 ? pageIndex : 0,
         onTap: (value) {
-          setState(() {
-            pageIndex = value;
-          });
+          context.read<CurrentPage>().setPageIndex(value);
         },
       ),
     );
@@ -180,6 +182,7 @@ class _PageLayoutState extends State<PageLayout> {
               SquareImage(
                 NetworkImage(context.watch<CurrentlyPlaying>().song.imgUrl),
                 300,
+                isLoading: context.watch<CurrentlyPlaying>().isCaching,
               ),
               Container(
                 alignment: Alignment.center,
@@ -225,6 +228,7 @@ class _PageLayoutState extends State<PageLayout> {
   }
 
   Widget desktopActionButton(BuildContext context) {
+    int pageIndex = context.watch<CurrentPage>().pageIndex;
     if (pageIndex == 0) {
       return Container(
         decoration: const BoxDecoration(
@@ -235,7 +239,7 @@ class _PageLayoutState extends State<PageLayout> {
         child: IconButton(
           icon: const Icon(Icons.account_circle),
           // onPressed: () => desktopAccounts(context),
-          onPressed: () => setState(() => pageIndex = 2),
+          onPressed: () => context.read<CurrentPage>().setPageIndex(2),
           color: const Color(0xff1E1E1E),
         ),
       );
@@ -249,7 +253,7 @@ class _PageLayoutState extends State<PageLayout> {
       margin: const EdgeInsets.only(top: 10),
       child: IconButton(
         icon: const Icon(Icons.arrow_back_ios_new_rounded),
-        onPressed: () => setState(() => pageIndex = 0),
+        onPressed: () => context.read<CurrentPage>().setPageIndex(0),
         color: const Color(0xff1E1E1E),
       ),
     );

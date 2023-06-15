@@ -99,6 +99,7 @@ class _NowPlayingState extends State<NowPlaying> {
         SquareImage(
           NetworkImage(context.watch<CurrentlyPlaying>().song.imgUrl),
           74,
+          isLoading: context.watch<CurrentlyPlaying>().isCaching,
         ),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 10),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:medley/objects/platform.dart';
 import 'package:medley/objects/playlist.dart';
 
@@ -8,7 +9,8 @@ import 'package:medley/services/medley.dart';
 
 class UserData with ChangeNotifier {
   bool _isAuthenticated = false;
-  final AllPlaylists _allPlaylists = AllPlaylists([], [], [], []);
+  AllPlaylists _allPlaylists = AllPlaylists([], [], [], []);
+  final FlutterSecureStorage _storage = FlutterSecureStorage();
 
   UserAccount _user = UserAccount.blank();
   YoutubeAccount _yt = YoutubeAccount.blank();
@@ -34,14 +36,16 @@ class UserData with ChangeNotifier {
   }
 
   Future<bool> login() async {
-    _user = UserAccount(1, true, 'Test');
+    _user = UserAccount(1, true, '');
     _isAuthenticated = _user.isAuthenticated;
-    fetchPlaylists();
+    fetchPlaylistsFromStorage();
+    fetchUsersFromStorage();
     return _isAuthenticated;
   }
 
   Future<bool> loginYoutube() async {
     _yt = await GoogleAuthService().signInToGoogle();
+    _storage.write(key: 'accounts/youtube', value: _yt.refreshToken);
     fetchPlaylists();
     notifyListeners();
     return _yt.isAuthenticated;
@@ -63,6 +67,7 @@ class UserData with ChangeNotifier {
                 child: const Text('Yes'),
                 onPressed: () {
                   _yt = YoutubeAccount.blank();
+                  _storage.delete(key: 'accounts/youtube');
                   fetchPlaylists();
                   notifyListeners();
                   Navigator.of(context).pop();
@@ -139,14 +144,28 @@ class UserData with ChangeNotifier {
   Future<AllPlaylists> fetchPlaylists() async {
     _allPlaylists.youtube =
         await MedleyService().getYoutubePlaylists(this, scope: 'all');
+    _allPlaylists.save();
     notifyListeners();
     return _allPlaylists;
+  }
+
+  void fetchPlaylistsFromStorage() async {
+    _allPlaylists = await _allPlaylists.fetchFromStorage();
+    notifyListeners();
+  }
+
+  void fetchUsersFromStorage() async {
+    if (await _storage.containsKey(key: 'accounts/youtube')) {
+      _yt = await GoogleAuthService().getAccountFromRefreshToken(await _storage.read(key: 'accounts/youtube') as String);
+    }
+    notifyListeners();
   }
 
   void updatePlaylist(Playlist playlist) async {
     String token = getToken(playlist.platform);
     playlist = await MedleyService().getSongs(token, playlist);
     _allPlaylists.updatePlaylistSongs(playlist);
+    _allPlaylists.save();
     notifyListeners();
   }
 }

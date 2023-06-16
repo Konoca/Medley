@@ -5,7 +5,6 @@ import 'package:medley/providers/page_provider.dart';
 import 'package:medley/providers/user_provider.dart';
 
 import 'package:provider/provider.dart';
-import 'package:medley/providers/song_provider.dart';
 import 'package:medley/objects/playlist.dart';
 
 class HomePage extends StatefulWidget {

@@ -40,6 +40,10 @@ class CurrentlyPlaying with ChangeNotifier {
   bool get isCaching => _isCaching;
   AllPlaylists get allPlaylists => _allPlaylists;
 
+  CurrentlyPlaying() {
+    _cache.fetchFromStorage();
+  }
+
   void playSong({addQueueIndex=true}) async {
     _display = true;
     _isPlaying = true;

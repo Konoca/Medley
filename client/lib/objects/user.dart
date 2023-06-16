@@ -33,7 +33,11 @@ class YoutubeAccount extends Account {
   late String _picture;
   String get picture => _picture;
 
+  late String _refreshToken;
+  String get refreshToken => _refreshToken;
+
   YoutubeAccount(
+    this._refreshToken,
     this._accessToken,
     this._picture,
     super._isAuthenticated,

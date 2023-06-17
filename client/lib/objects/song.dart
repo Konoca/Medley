@@ -1,12 +1,14 @@
 import 'dart:convert';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:medley/objects/iso8601_duration.dart';
 import 'package:medley/objects/platform.dart';
 
 class Song {
   final String title;
   final String artist;
   final String imgUrl;
+  final String duration;
   final String platformId;
   final AudioPlatform platform;
 
@@ -14,6 +16,7 @@ class Song {
     this.title,
     this.artist,
     this.imgUrl,
+    this.duration,
     this.platformId,
     this.platform,
   );
@@ -23,6 +26,7 @@ class Song {
       json['song_title'],
       json['artist'],
       json['thumbnail'],
+      ISO8601Duration(json['duration']).toDuration().toString(),
       json['song_id'],
       platform,
     );
@@ -33,6 +37,7 @@ class Song {
       map['song_title'],
       map['artist'],
       map['thumbnail'],
+      map['duration'] ?? '',
       map['song_id'],
       AudioPlatform.fromId(map['platform_id']),
     );
@@ -42,6 +47,7 @@ class Song {
       : title = '',
         artist = '',
         imgUrl = '',
+        duration = '',
         platformId = '',
         platform = AudioPlatform.empty();
 
@@ -50,6 +56,7 @@ class Song {
       'song_title': title,
       'artist': artist,
       'thumbnail': imgUrl,
+      'duration': duration,
       'song_id': platformId,
       'platform_id': platform.id
     };
@@ -85,19 +92,6 @@ class SongCache {
   bool isEmpty() {
     return _cache.isEmpty;
   }
-
-  // void save() {
-  //   _storage.write(
-  //     key: _storageKey,
-  //     value: jsonEncode(
-  //       _cache.map((cache) => {
-  //           'platform': key.platform.id,
-  //           'platform_id': key.platformId,
-  //           'cache_url': value,
-  //         }),
-  //       ).toList(),
-  //     );
-  // }
 
   void save() {
     _storage.write(

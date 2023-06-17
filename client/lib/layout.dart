@@ -35,17 +35,15 @@ class _PageLayoutState extends State<PageLayout> {
     if (pageIndex == 1) p = const SearchPage();
     if (pageIndex == 2) p = const AccountPage();
     if (pageIndex == 3) p = const PlaylistPage();
-    return Container(
-      child: Column(
-        children: [
-          if (!isMobile()) desktopMenuBar(ctx),
-          Expanded(
-            flex: 1,
-            child: p,
-          ),
-          nowPlaying(ctx),
-        ],
-      ),
+    return Column(
+      children: [
+        if (!isMobile()) desktopMenuBar(ctx),
+        Expanded(
+          flex: 1,
+          child: p,
+        ),
+        nowPlaying(ctx),
+      ],
     );
   }
 
@@ -99,7 +97,7 @@ class _PageLayoutState extends State<PageLayout> {
     if (display || kIsWeb || (!Platform.isIOS && !Platform.isAndroid)) {
       return Column(
         children: [
-          durationBar(context), 
+          durationBar(context),
           controlBar(context),
         ],
       );
@@ -128,8 +126,8 @@ class _PageLayoutState extends State<PageLayout> {
         inactiveColor: const Color(0xFF404040),
         value: progress,
         onChanged: (v) => context.read<CurrentlyPlaying>().seek(
-          Duration(microseconds: (songDuration.inMicroseconds * v).toInt()),
-        ),
+              Duration(microseconds: (songDuration.inMicroseconds * v).toInt()),
+            ),
         overlayColor: MaterialStateProperty.all(Colors.transparent),
       ),
     );
@@ -290,32 +288,30 @@ class _PageLayoutState extends State<PageLayout> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Container(
-            child: Row(
-              children: [
-                Container(
-                  decoration: const BoxDecoration(
-                    borderRadius: BorderRadius.all(Radius.circular(45)),
-                    color: Color(0x80404040),
-                  ),
-                  child: IconButton(
-                    icon: const Icon(Icons.arrow_back_ios_new_rounded),
-                    onPressed: () => context.read<CurrentPage>().setPageIndex(0),
-                    // color: const Color(0xff1E1E1E),
-                    color: Colors.white,
+          Row(
+            children: [
+              Container(
+                decoration: const BoxDecoration(
+                  borderRadius: BorderRadius.all(Radius.circular(45)),
+                  color: Color(0x80404040),
+                ),
+                child: IconButton(
+                  icon: const Icon(Icons.arrow_back_ios_new_rounded),
+                  onPressed: () => context.read<CurrentPage>().setPageIndex(0),
+                  // color: const Color(0xff1E1E1E),
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(
+                width: 250,
+                child: TextField(
+                  decoration: InputDecoration(
+                    border: UnderlineInputBorder(),
+                    // labelText: 'Search',
                   ),
                 ),
-                SizedBox(
-                  width: 250,
-                  child: TextField(
-                    decoration: InputDecoration(
-                      border: UnderlineInputBorder(),
-                      // labelText: 'Search',
-                    ),
-                  ),
-                ),
-              ],
-            )
+              ),
+            ],
           ),
           Container(
             decoration: const BoxDecoration(

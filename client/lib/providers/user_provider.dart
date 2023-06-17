@@ -10,7 +10,7 @@ import 'package:medley/services/medley.dart';
 class UserData with ChangeNotifier {
   bool _isAuthenticated = false;
   AllPlaylists _allPlaylists = AllPlaylists([], [], [], []);
-  final FlutterSecureStorage _storage = FlutterSecureStorage();
+  final FlutterSecureStorage _storage = const FlutterSecureStorage();
 
   UserAccount _user = UserAccount.blank();
   YoutubeAccount _yt = YoutubeAccount.blank();

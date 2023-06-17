@@ -55,15 +55,18 @@ class CurrentlyPlaying with ChangeNotifier {
 
     String url = _cache.get(_song);
 
-    if (url == '') {
+    try {
+      if (url == '') throw Exception();
+      await _player.setSource(UrlSource(url));
+    } on Exception {
       _setCaching(true);
       _cache = await MedleyService().getStreamUrlBulk(_queue, _cache);
       url = _cache.get(_song);
       _setCaching(false);
+      _player.setSource(UrlSource(url));
     }
+    _player.resume();
     
-    _player.play(UrlSource(url));
-
     _determineNextIndex();
     notifyListeners();
   }

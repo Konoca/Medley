@@ -36,9 +36,9 @@ class _PageLayoutState extends State<PageLayout> {
     if (pageIndex == 2) p = const AccountPage();
     if (pageIndex == 3) p = const PlaylistPage();
     return Container(
-      padding: const EdgeInsets.only(top: 50),
       child: Column(
         children: [
+          if (!isMobile()) desktopMenuBar(ctx),
           Expanded(
             flex: 1,
             child: p,
@@ -65,7 +65,7 @@ class _PageLayoutState extends State<PageLayout> {
 
     player.onDurationChanged.listen((duration) {
       // work around until I figure out *why*
-      //apple devices misread the duration of .m4a
+      // apple devices misread the duration of .m4a
       if (isApple() && song.platform.id == AudioPlatform.youtube().id) {
         duration =
             Duration(microseconds: (duration.inMicroseconds.toDouble() ~/ 2));
@@ -99,15 +99,40 @@ class _PageLayoutState extends State<PageLayout> {
     if (display || kIsWeb || (!Platform.isIOS && !Platform.isAndroid)) {
       return Column(
         children: [
-          LinearProgressIndicator(
-            color: Colors.white,
-            value: progress,
-          ),
+          durationBar(context), 
           controlBar(context),
         ],
       );
     }
     return Container();
+  }
+
+  Widget durationBar(BuildContext context) {
+    if (isMobile()) {
+      return LinearProgressIndicator(
+        color: Colors.white,
+        value: progress,
+      );
+    }
+    return durationSlider(context);
+  }
+
+  Widget durationSlider(BuildContext context) {
+    return SliderTheme(
+      data: SliderThemeData(
+        overlayShape: SliderComponentShape.noOverlay,
+        thumbShape: SliderComponentShape.noThumb,
+      ),
+      child: Slider(
+        activeColor: Colors.white,
+        inactiveColor: const Color(0xFF404040),
+        value: progress,
+        onChanged: (v) => context.read<CurrentlyPlaying>().seek(
+          Duration(microseconds: (songDuration.inMicroseconds * v).toInt()),
+        ),
+        overlayColor: MaterialStateProperty.all(Colors.transparent),
+      ),
+    );
   }
 
   Widget controlBar(BuildContext context) {
@@ -133,7 +158,10 @@ class _PageLayoutState extends State<PageLayout> {
     int pageIndex = context.watch<CurrentPage>().pageIndex;
     return Scaffold(
       backgroundColor: Colors.transparent,
-      body: selectPage(context),
+      body: Container(
+        padding: const EdgeInsets.only(top: 50),
+        child: selectPage(context),
+      ),
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: const Color(0xFF1E1E1E),
         selectedItemColor: const Color(0xFF73A5FD),
@@ -210,10 +238,7 @@ class _PageLayoutState extends State<PageLayout> {
               Container(
                 padding: const EdgeInsets.only(top: 50),
                 margin: const EdgeInsets.symmetric(horizontal: 20),
-                child: LinearProgressIndicator(
-                  color: Colors.white,
-                  value: progress,
-                ),
+                child: durationSlider(context),
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -238,7 +263,6 @@ class _PageLayoutState extends State<PageLayout> {
         margin: const EdgeInsets.only(top: 10),
         child: IconButton(
           icon: const Icon(Icons.account_circle),
-          // onPressed: () => desktopAccounts(context),
           onPressed: () => context.read<CurrentPage>().setPageIndex(2),
           color: const Color(0xff1E1E1E),
         ),
@@ -259,12 +283,63 @@ class _PageLayoutState extends State<PageLayout> {
     );
   }
 
+  Widget desktopMenuBar(BuildContext context) {
+    return Container(
+      height: 50,
+      padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 5),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Container(
+            child: Row(
+              children: [
+                Container(
+                  decoration: const BoxDecoration(
+                    borderRadius: BorderRadius.all(Radius.circular(45)),
+                    color: Color(0x80404040),
+                  ),
+                  child: IconButton(
+                    icon: const Icon(Icons.arrow_back_ios_new_rounded),
+                    onPressed: () => context.read<CurrentPage>().setPageIndex(0),
+                    // color: const Color(0xff1E1E1E),
+                    color: Colors.white,
+                  ),
+                ),
+                SizedBox(
+                  width: 250,
+                  child: TextField(
+                    decoration: InputDecoration(
+                      border: UnderlineInputBorder(),
+                      // labelText: 'Search',
+                    ),
+                  ),
+                ),
+              ],
+            )
+          ),
+          Container(
+            decoration: const BoxDecoration(
+              borderRadius: BorderRadius.all(Radius.circular(45)),
+              color: Color(0x80404040),
+            ),
+            child: IconButton(
+              icon: const Icon(Icons.account_circle),
+              onPressed: () => context.read<CurrentPage>().setPageIndex(2),
+              // color: const Color(0xff1E1E1E),
+              color: Colors.white,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget desktopLayout() {
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: selectPage(context),
-      floatingActionButton: desktopActionButton(context),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
+      // floatingActionButton: desktopActionButton(context),
+      // floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
     );
   }
 

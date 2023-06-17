@@ -250,37 +250,6 @@ class _PageLayoutState extends State<PageLayout> {
     );
   }
 
-  Widget desktopActionButton(BuildContext context) {
-    int pageIndex = context.watch<CurrentPage>().pageIndex;
-    if (pageIndex == 0) {
-      return Container(
-        decoration: const BoxDecoration(
-          borderRadius: BorderRadius.all(Radius.circular(45)),
-          color: Color(0x80404040),
-        ),
-        margin: const EdgeInsets.only(top: 10),
-        child: IconButton(
-          icon: const Icon(Icons.account_circle),
-          onPressed: () => context.read<CurrentPage>().setPageIndex(2),
-          color: const Color(0xff1E1E1E),
-        ),
-      );
-    }
-
-    return Container(
-      decoration: const BoxDecoration(
-        borderRadius: BorderRadius.all(Radius.circular(45)),
-        color: Color(0x80404040),
-      ),
-      margin: const EdgeInsets.only(top: 10),
-      child: IconButton(
-        icon: const Icon(Icons.arrow_back_ios_new_rounded),
-        onPressed: () => context.read<CurrentPage>().setPageIndex(0),
-        color: const Color(0xff1E1E1E),
-      ),
-    );
-  }
-
   Widget desktopMenuBar(BuildContext context) {
     return Container(
       height: 50,
@@ -334,8 +303,6 @@ class _PageLayoutState extends State<PageLayout> {
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: selectPage(context),
-      // floatingActionButton: desktopActionButton(context),
-      // floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
     );
   }
 

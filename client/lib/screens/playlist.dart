@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:medley/components/image.dart';
+import 'package:medley/components/media_controls.dart';
 import 'package:medley/components/text.dart';
 import 'package:medley/objects/playlist.dart';
 import 'package:medley/providers/page_provider.dart';
@@ -55,7 +56,8 @@ class _PlaylistPageState extends State<PlaylistPage> {
                         ],
                       ),
                     ),
-                    Text(
+                    if (!isMobile())
+                      Text(
                         song.duration.substring(0, song.duration.length - 7),
                         style: const TextStyle(
                           color: Color(0x80FFFFFF),

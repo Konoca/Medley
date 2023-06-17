@@ -1,11 +1,12 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
-import 'package:audioplayers/audioplayers.dart';
+// import 'package:audioplayers/audioplayers.dart';
 import 'package:medley/components/image.dart';
 
 import 'package:medley/components/media_controls.dart';
 import 'package:medley/components/text.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:medley/objects/platform.dart';
 import 'package:medley/objects/song.dart';
 import 'package:medley/providers/page_provider.dart';
@@ -61,18 +62,20 @@ class _PageLayoutState extends State<PageLayout> {
     AudioPlayer player = ctx.watch<CurrentlyPlaying>().player;
     Song song = ctx.watch<CurrentlyPlaying>().song;
 
-    player.onDurationChanged.listen((duration) {
+    player.durationStream.listen((duration) {
       // work around until I figure out *why*
       // apple devices misread the duration of .m4a
-      if (isApple() && song.platform.id == AudioPlatform.youtube().id) {
+      if (duration == null) return;
+
+      if (isApple() && song.platform.id == AudioPlatform.youtube().id && song.platform.codec == 'm4a') {
         duration =
             Duration(microseconds: (duration.inMicroseconds.toDouble() ~/ 2));
       }
 
-      setState(() => songDuration = duration);
+      setState(() => songDuration = duration!);
     });
 
-    player.onPositionChanged.listen((position) {
+    player.positionStream.listen((position) {
       if (songDuration == Duration.zero) {
         setState(() => progress = 0);
         return;
@@ -87,9 +90,9 @@ class _PageLayoutState extends State<PageLayout> {
       if (progress > 1) nextSong(ctx);
     });
 
-    player.onPlayerStateChanged.listen((state) {
-      if (songDuration == Duration.zero) return;
-      if (state != PlayerState.completed) return;
+    player.playerStateStream.listen((state) {
+      if (songDuration == Duration.zero || progress < 1) return;
+      if (state.processingState != ProcessingState.completed) return;
 
       nextSong(ctx);
     });

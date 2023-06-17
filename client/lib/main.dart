@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:just_audio_background/just_audio_background.dart';
 
 import 'package:medley/layout.dart';
 import 'package:medley/providers/page_provider.dart';
@@ -16,8 +17,12 @@ Future<void> main() async {
   if (!kIsWeb && (Platform.isWindows || Platform.isMacOS || Platform.isLinux)) {
     await windowManager.ensureInitialized();
     WindowManager.instance.setMinimumSize(const Size(800, 600));
-    // WindowManager.instance.setMaximumSize(const Size(1200, 600));
   }
+  await JustAudioBackground.init(
+    androidNotificationChannelId: 'com.example.medley.channel.audio',
+    androidNotificationChannelName: 'Medley',
+    androidNotificationOngoing: true,
+  );
   runApp(MultiProvider(
     providers: [
       ChangeNotifierProvider(create: (_) => CurrentlyPlaying()),

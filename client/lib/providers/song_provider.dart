@@ -1,6 +1,9 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:audioplayers/audioplayers.dart';
+// import 'package:audioplayers/audioplayers.dart';
+import 'package:audio_session/audio_session.dart';
+import 'package:just_audio/just_audio.dart';
+import 'package:just_audio_background/just_audio_background.dart';
 import 'package:medley/objects/song.dart';
 import 'package:medley/objects/playlist.dart';
 
@@ -19,6 +22,7 @@ class CurrentlyPlaying with ChangeNotifier {
   late AllPlaylists _allPlaylists;
 
   final AudioPlayer _player = AudioPlayer();
+  late AudioSession session;
   final Random _rng = Random();
 
   List<Song> _queue = [];
@@ -29,7 +33,7 @@ class CurrentlyPlaying with ChangeNotifier {
   bool _isCaching = false;
 
   bool get display => _display;
-  bool get isPlaying => _isPlaying;
+  bool get isPlaying => _player.playing;
   bool get shuffle => _shuffle;
   bool get loop => _loop;
   double get volume => _volume;
@@ -42,37 +46,66 @@ class CurrentlyPlaying with ChangeNotifier {
 
   CurrentlyPlaying() {
     _cache.fetchFromStorage();
+    init();
   }
 
-  void playSong({addQueueIndex=true}) async {
+  init() async {
+    final session = await AudioSession.instance;
+    await session.configure(const AudioSessionConfiguration.music());
+  }
+
+  void playSong({addQueueIndex = true}) async {
     _display = true;
     _isPlaying = true;
     _song = _queue[_nextIndex];
     if (_queueIndex != -1 && addQueueIndex == true) _queueIdxHistory.add(_queueIndex);
     _queueIndex = _nextIndex;
 
-    if (_player.state == PlayerState.playing) _player.stop();
+    if (_player.playing) _player.stop();
 
     String url = _cache.get(_song);
 
     try {
       if (url == '') throw Exception();
-      await _player.setSource(UrlSource(url));
+      await _player.setAudioSource(
+        AudioSource.uri(
+          Uri.parse(url),
+          tag: MediaItem(
+            id: url,
+            title: _song.title,
+            artist: _song.artist,
+            artUri: Uri.parse(_song.imgUrl),
+            album: _playlist.title,
+          ),
+        ),
+      );
+      _setCaching(false);
     } on Exception {
       _setCaching(true);
       _cache = await MedleyService().getStreamUrlBulk(_queue, _cache);
       url = _cache.get(_song);
       _setCaching(false);
-      _player.setSource(UrlSource(url));
+      _player.setAudioSource(
+        AudioSource.uri(
+          Uri.parse(url),
+          tag: MediaItem(
+            id: url,
+            title: _song.title,
+            artist: _song.artist,
+            artUri: Uri.parse(_song.imgUrl),
+            album: _playlist.title,
+          ),
+        ),
+      );
     }
-    _player.resume();
-    
+    _player.play();
+
     _determineNextIndex();
     notifyListeners();
   }
 
   void setPlaylist(Playlist pl, {Song? song}) async {
-    if (_player.state == PlayerState.playing) _player.stop();
+    if (_player.playing) _player.stop();
 
     _playlist = pl;
     _display = true;
@@ -111,7 +144,7 @@ class CurrentlyPlaying with ChangeNotifier {
     if (_queue.isEmpty) return;
 
     _isPlaying = !_isPlaying;
-    _isPlaying ? _player.resume() : _player.pause();
+    _isPlaying ? _player.play() : _player.pause();
     notifyListeners();
   }
 
@@ -137,9 +170,9 @@ class CurrentlyPlaying with ChangeNotifier {
     notifyListeners();
   }
 
-  void seek(Duration progress) {
-    _progress = progress;
-    _player.seek(progress);
+  void seek(Duration position) {
+    _progress = position;
+    _player.seek(position);
     notifyListeners();
   }
 

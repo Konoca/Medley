@@ -150,7 +150,7 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: "29a391e5a9ae043a9a8d1fbc92f1c8dca975b5ca"
+      resolved-ref: a1608d04c5f5a81e55a9a5684b13a5cc8508c23a
       url: "https://github.com/Konoca/flutter_desktop_webview_auth.git"
     source: git
     version: "0.0.12"

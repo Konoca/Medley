@@ -36,6 +36,8 @@ class YoutubeAccount extends Account {
   late String _refreshToken;
   String get refreshToken => _refreshToken;
 
+  String get storageKey => 'medley_accounts_youtube';
+
   YoutubeAccount(
     this._refreshToken,
     this._accessToken,

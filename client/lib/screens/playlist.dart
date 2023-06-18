@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:medley/components/image.dart';
+import 'package:medley/components/media_controls.dart';
 import 'package:medley/components/text.dart';
 import 'package:medley/objects/playlist.dart';
 import 'package:medley/providers/page_provider.dart';
@@ -30,28 +31,40 @@ class _PlaylistPageState extends State<PlaylistPage> {
             ),
             padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
             child: Row(
-              // mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                SquareImage(
-                  NetworkImage(song.imgUrl),
-                  50,
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      ScrollingText(
-                        song.title,
-                        width: MediaQuery.sizeOf(context).width * 0.75,
-                        style: const TextStyle(fontWeight: FontWeight.bold),
+                Row(
+                  children: [
+                    SquareImage(
+                      NetworkImage(song.imgUrl),
+                      50,
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          ScrollingText(
+                            song.title,
+                            width: MediaQuery.sizeOf(context).width * 0.75,
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          ScrollingText(
+                            song.artist,
+                            width: MediaQuery.sizeOf(context).width * 0.75,
+                          ),
+                        ],
                       ),
-                      ScrollingText(
-                        song.artist,
-                        width: MediaQuery.sizeOf(context).width * 0.75,
+                    ),
+                    if (!isMobile())
+                      Text(
+                        song.duration.substring(0, song.duration.length - 7),
+                        style: const TextStyle(
+                          color: Color(0x80FFFFFF),
+                        ),
+                        textAlign: TextAlign.right,
                       ),
-                    ],
-                  ),
+                  ],
                 ),
               ],
             ),

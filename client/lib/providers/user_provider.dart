@@ -10,7 +10,7 @@ import 'package:medley/services/medley.dart';
 class UserData with ChangeNotifier {
   bool _isAuthenticated = false;
   AllPlaylists _allPlaylists = AllPlaylists([], [], [], []);
-  final FlutterSecureStorage _storage = FlutterSecureStorage();
+  final FlutterSecureStorage _storage = const FlutterSecureStorage();
 
   UserAccount _user = UserAccount.blank();
   YoutubeAccount _yt = YoutubeAccount.blank();
@@ -45,7 +45,7 @@ class UserData with ChangeNotifier {
 
   Future<bool> loginYoutube() async {
     _yt = await GoogleAuthService().signInToGoogle();
-    _storage.write(key: 'accounts/youtube', value: _yt.refreshToken);
+    _storage.write(key: _yt.storageKey, value: _yt.refreshToken);
     fetchPlaylists();
     notifyListeners();
     return _yt.isAuthenticated;
@@ -67,7 +67,7 @@ class UserData with ChangeNotifier {
                 child: const Text('Yes'),
                 onPressed: () {
                   _yt = YoutubeAccount.blank();
-                  _storage.delete(key: 'accounts/youtube');
+                  _storage.delete(key: _yt.storageKey);
                   fetchPlaylists();
                   notifyListeners();
                   Navigator.of(context).pop();
@@ -155,8 +155,8 @@ class UserData with ChangeNotifier {
   }
 
   void fetchUsersFromStorage() async {
-    if (await _storage.containsKey(key: 'accounts/youtube')) {
-      _yt = await GoogleAuthService().getAccountFromRefreshToken(await _storage.read(key: 'accounts/youtube') as String);
+    if (await _storage.containsKey(key: _yt.storageKey)) {
+      _yt = await GoogleAuthService().getAccountFromRefreshToken(await _storage.read(key: _yt.storageKey) as String);
     }
     notifyListeners();
   }

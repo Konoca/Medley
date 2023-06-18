@@ -71,10 +71,12 @@ class _HomePageState extends State<HomePage> {
     if (playlists.isEmpty()) {
       return [
         Container(
-          alignment: Alignment.center,
-          height: 500,
-          child: const Text('Get started by linking an account!', style: TextStyle(color: Color(0xFF1E1E1E)),)
-        )
+            alignment: Alignment.center,
+            height: 500,
+            child: const Text(
+              'Get started by linking an account!',
+              style: TextStyle(color: Color(0xFF1E1E1E)),
+            ))
       ];
     }
 
@@ -139,10 +141,20 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      padding: const EdgeInsets.all(5),
-      scrollDirection: Axis.vertical,
-      children: fetchPlaylists(context),
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      body: ListView(
+        padding: const EdgeInsets.all(5),
+        scrollDirection: Axis.vertical,
+        children: fetchPlaylists(context),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {},
+        backgroundColor: const Color(0x8073A5FD),
+        mini: true,
+        child: const Icon(Icons.add),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.miniEndFloat,
     );
   }
 }

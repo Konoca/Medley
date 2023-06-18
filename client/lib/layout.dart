@@ -1,11 +1,12 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
-import 'package:audioplayers/audioplayers.dart';
+// import 'package:audioplayers/audioplayers.dart';
 import 'package:medley/components/image.dart';
 
 import 'package:medley/components/media_controls.dart';
 import 'package:medley/components/text.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:medley/objects/platform.dart';
 import 'package:medley/objects/song.dart';
 import 'package:medley/providers/page_provider.dart';
@@ -35,17 +36,15 @@ class _PageLayoutState extends State<PageLayout> {
     if (pageIndex == 1) p = const SearchPage();
     if (pageIndex == 2) p = const AccountPage();
     if (pageIndex == 3) p = const PlaylistPage();
-    return Container(
-      padding: const EdgeInsets.only(top: 50),
-      child: Column(
-        children: [
-          Expanded(
-            flex: 1,
-            child: p,
-          ),
-          nowPlaying(ctx),
-        ],
-      ),
+    return Column(
+      children: [
+        if (!isMobile()) desktopMenuBar(ctx),
+        Expanded(
+          flex: 1,
+          child: p,
+        ),
+        nowPlaying(ctx),
+      ],
     );
   }
 
@@ -63,18 +62,20 @@ class _PageLayoutState extends State<PageLayout> {
     AudioPlayer player = ctx.watch<CurrentlyPlaying>().player;
     Song song = ctx.watch<CurrentlyPlaying>().song;
 
-    player.onDurationChanged.listen((duration) {
+    player.durationStream.listen((duration) {
       // work around until I figure out *why*
-      //apple devices misread the duration of .m4a
-      if (isApple() && song.platform.id == AudioPlatform.youtube().id) {
+      // apple devices misread the duration of .m4a
+      if (duration == null) return;
+
+      if (isApple() && song.platform.id == AudioPlatform.youtube().id && song.platform.codec == 'm4a') {
         duration =
             Duration(microseconds: (duration.inMicroseconds.toDouble() ~/ 2));
       }
 
-      setState(() => songDuration = duration);
+      setState(() => songDuration = duration!);
     });
 
-    player.onPositionChanged.listen((position) {
+    player.positionStream.listen((position) {
       if (songDuration == Duration.zero) {
         setState(() => progress = 0);
         return;
@@ -89,9 +90,9 @@ class _PageLayoutState extends State<PageLayout> {
       if (progress > 1) nextSong(ctx);
     });
 
-    player.onPlayerStateChanged.listen((state) {
-      if (songDuration == Duration.zero) return;
-      if (state != PlayerState.completed) return;
+    player.playerStateStream.listen((state) {
+      if (songDuration == Duration.zero || progress < 1) return;
+      if (state.processingState != ProcessingState.completed) return;
 
       nextSong(ctx);
     });
@@ -99,15 +100,40 @@ class _PageLayoutState extends State<PageLayout> {
     if (display || kIsWeb || (!Platform.isIOS && !Platform.isAndroid)) {
       return Column(
         children: [
-          LinearProgressIndicator(
-            color: Colors.white,
-            value: progress,
-          ),
+          durationBar(context),
           controlBar(context),
         ],
       );
     }
     return Container();
+  }
+
+  Widget durationBar(BuildContext context) {
+    if (isMobile()) {
+      return LinearProgressIndicator(
+        color: Colors.white,
+        value: progress,
+      );
+    }
+    return durationSlider(context);
+  }
+
+  Widget durationSlider(BuildContext context) {
+    return SliderTheme(
+      data: SliderThemeData(
+        overlayShape: SliderComponentShape.noOverlay,
+        thumbShape: SliderComponentShape.noThumb,
+      ),
+      child: Slider(
+        activeColor: Colors.white,
+        inactiveColor: const Color(0xFF404040),
+        value: progress,
+        onChanged: (v) => context.read<CurrentlyPlaying>().seek(
+              Duration(microseconds: (songDuration.inMicroseconds * v).toInt()),
+            ),
+        overlayColor: MaterialStateProperty.all(Colors.transparent),
+      ),
+    );
   }
 
   Widget controlBar(BuildContext context) {
@@ -133,7 +159,10 @@ class _PageLayoutState extends State<PageLayout> {
     int pageIndex = context.watch<CurrentPage>().pageIndex;
     return Scaffold(
       backgroundColor: Colors.transparent,
-      body: selectPage(context),
+      body: Container(
+        padding: const EdgeInsets.only(top: 50),
+        child: selectPage(context),
+      ),
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: const Color(0xFF1E1E1E),
         selectedItemColor: const Color(0xFF73A5FD),
@@ -210,10 +239,7 @@ class _PageLayoutState extends State<PageLayout> {
               Container(
                 padding: const EdgeInsets.only(top: 50),
                 margin: const EdgeInsets.symmetric(horizontal: 20),
-                child: LinearProgressIndicator(
-                  color: Colors.white,
-                  value: progress,
-                ),
+                child: durationSlider(context),
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -227,34 +253,51 @@ class _PageLayoutState extends State<PageLayout> {
     );
   }
 
-  Widget desktopActionButton(BuildContext context) {
-    int pageIndex = context.watch<CurrentPage>().pageIndex;
-    if (pageIndex == 0) {
-      return Container(
-        decoration: const BoxDecoration(
-          borderRadius: BorderRadius.all(Radius.circular(45)),
-          color: Color(0x80404040),
-        ),
-        margin: const EdgeInsets.only(top: 10),
-        child: IconButton(
-          icon: const Icon(Icons.account_circle),
-          // onPressed: () => desktopAccounts(context),
-          onPressed: () => context.read<CurrentPage>().setPageIndex(2),
-          color: const Color(0xff1E1E1E),
-        ),
-      );
-    }
-
+  Widget desktopMenuBar(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
-        borderRadius: BorderRadius.all(Radius.circular(45)),
-        color: Color(0x80404040),
-      ),
-      margin: const EdgeInsets.only(top: 10),
-      child: IconButton(
-        icon: const Icon(Icons.arrow_back_ios_new_rounded),
-        onPressed: () => context.read<CurrentPage>().setPageIndex(0),
-        color: const Color(0xff1E1E1E),
+      height: 50,
+      padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 5),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              Container(
+                decoration: const BoxDecoration(
+                  borderRadius: BorderRadius.all(Radius.circular(45)),
+                  color: Color(0x80404040),
+                ),
+                child: IconButton(
+                  icon: const Icon(Icons.arrow_back_ios_new_rounded),
+                  onPressed: () => context.read<CurrentPage>().setPageIndex(0),
+                  // color: const Color(0xff1E1E1E),
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(
+                width: 250,
+                child: TextField(
+                  decoration: InputDecoration(
+                    border: UnderlineInputBorder(),
+                    // labelText: 'Search',
+                  ),
+                ),
+              ),
+            ],
+          ),
+          Container(
+            decoration: const BoxDecoration(
+              borderRadius: BorderRadius.all(Radius.circular(45)),
+              color: Color(0x80404040),
+            ),
+            child: IconButton(
+              icon: const Icon(Icons.account_circle),
+              onPressed: () => context.read<CurrentPage>().setPageIndex(2),
+              // color: const Color(0xff1E1E1E),
+              color: Colors.white,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -263,8 +306,6 @@ class _PageLayoutState extends State<PageLayout> {
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: selectPage(context),
-      floatingActionButton: desktopActionButton(context),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
     );
   }
 

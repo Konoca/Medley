@@ -23,7 +23,7 @@ class GoogleAuthService {
       }
       return await _desktopLogin();
     } catch (e) {
-      print(e);
+      // print(e);
       return YoutubeAccount.blank();
     }
   }
@@ -57,7 +57,7 @@ class GoogleAuthService {
         nonce: _generateNonce(),
     ));
     final accessToken = result!.accessToken!;
-    final serverAuthCode = result!.code!;
+    final serverAuthCode = result.code!;
     final refreshToken = await _fetchRefreshToken(accessToken, serverAuthCode);
 
     final data = await getUserData(accessToken);

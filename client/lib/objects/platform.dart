@@ -29,7 +29,8 @@ class AudioPlatform {
   AudioPlatform.youtube()
       : name = "Youtube",
         id = 1,
-        codec = "m4a";
+        codec = "mp4";
+        // codec = "m4a";
 
   AudioPlatform.spotify()
       : name = "Spotify",

@@ -18,11 +18,13 @@ Future<void> main() async {
     await windowManager.ensureInitialized();
     WindowManager.instance.setMinimumSize(const Size(800, 600));
   }
-  await JustAudioBackground.init(
-    androidNotificationChannelId: 'com.example.medley.channel.audio',
-    androidNotificationChannelName: 'Medley',
-    androidNotificationOngoing: true,
-  );
+  if (kIsWeb || Platform.isAndroid || Platform.isIOS || Platform.isMacOS) {
+    await JustAudioBackground.init(
+      androidNotificationChannelId: 'com.example.medley.channel.audio',
+      androidNotificationChannelName: 'Medley',
+      androidNotificationOngoing: true,
+    );
+  }
   runApp(MultiProvider(
     providers: [
       ChangeNotifierProvider(create: (_) => CurrentlyPlaying()),

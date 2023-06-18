@@ -3,15 +3,17 @@ import 'package:google_sign_in/google_sign_in.dart';
 class Account {
   bool _isAuthenticated;
   String _userName;
+  final String storageKey;
 
   bool get isAuthenticated => _isAuthenticated;
   String get userName => _userName;
 
-  Account(this._isAuthenticated, this._userName);
+  Account(this._isAuthenticated, this._userName, {this.storageKey = ''});
 
   Account.blank()
       : _isAuthenticated = false,
-        _userName = '';
+        _userName = '',
+        storageKey = '';
 
   void login(String userName) {
     _isAuthenticated = true;
@@ -41,8 +43,9 @@ class YoutubeAccount extends Account {
     this._accessToken,
     this._picture,
     super._isAuthenticated,
-    super._userName,
-  );
+    super._userName, {
+    super.storageKey = 'medley_accounts_youtube',
+  });
 
   YoutubeAccount.blank() : super.blank();
 }

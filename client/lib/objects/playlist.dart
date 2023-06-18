@@ -4,10 +4,10 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:medley/objects/platform.dart';
 import 'package:medley/objects/song.dart';
 
-const String customStorageKey = 'playtlists/custom';
-const String youtubeStorageKey = 'playtlists/youtube';
-const String spotifyStorageKey = 'playtlists/spotify';
-const String soundcloudStorageKey = 'playtlists/soundcloud';
+const String customStorageKey = 'medley_playtlists_custom';
+const String youtubeStorageKey = 'medley_playtlists_youtube';
+const String spotifyStorageKey = 'medley_playtlists_spotify';
+const String soundcloudStorageKey = 'medley_playtlists_soundcloud';
 
 class Playlist {
   final String title;

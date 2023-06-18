@@ -66,7 +66,7 @@ class Song {
 class SongCache {
   Map<SongCacheKey, String> _cache = {};
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
-  final String _storageKey = 'cache/songs';
+  final String _storageKey = 'medley_cache_songs';
 
   void set(String id, int platform, String url) {
     final key = SongCacheKey(AudioPlatform.fromId(platform), id);

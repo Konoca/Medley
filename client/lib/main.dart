@@ -20,7 +20,7 @@ Future<void> main() async {
   }
   if (kIsWeb || Platform.isAndroid || Platform.isIOS || Platform.isMacOS) {
     await JustAudioBackground.init(
-      androidNotificationChannelId: 'com.example.medley.channel.audio',
+      androidNotificationChannelId: 'com.konoca.medley.channel.audio',
       androidNotificationChannelName: 'Medley',
       androidNotificationOngoing: true,
     );

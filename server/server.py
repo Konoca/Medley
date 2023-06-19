@@ -1,4 +1,6 @@
 import os
+import json
+import requests
 import concurrent.futures
 import yt_dlp as yt
 import mysql.connector
@@ -22,36 +24,24 @@ cnx = mysql.connector.connect(
         password = SQL_PASSWORD
       )
 
-# API Requests
-@app.route('/api/stream', methods=['POST'])
-def stream():
-    data = request.get_json()
-
-    processes = []
-    response = []
-
-    with concurrent.futures.ProcessPoolExecutor() as executor:
-        for item in data:
-            processes.append(
-                executor.submit(
-                    fetch_stream_obj,
-                    item['platform'],
-                    item['codec'],
-                    item['id']
-                )
-            )
-        for process in processes:
-            response.append(process.result())
-    return jsonify(response)
-
-
-def fetch_stream_obj(platform: int, codec: str, id: str):
+# Fetch updated stream link for specific song and platform
+def fetch_stream_obj(platform: int, codec: str, id: str, token: str):
     if platform == 1:
         url = f'https://youtube.com/watch?v={id}'
 
-    # TODO Spotify Support  
     if platform == 2:
-        return
+        url = f'https://api.spotify.com/v1/tracks/{id}'
+        headers = {'Authorization': f'Bearer {token}'}
+        response = requests.get(url, headers=headers)
+        if response.status_code == 200:
+            body = json.loads(response.content)
+            return {
+                'id': id,
+                'platform': platform,
+                'url': body['preview_url']
+            }
+        else:
+            return response.json()
     
     if platform == 3:
         url = f'https://soundcloud.com/{id}'
@@ -67,6 +57,34 @@ def fetch_stream_obj(platform: int, codec: str, id: str):
         return
 
 
+# API REQUESTS
+
+# Get streaming information for a list of songs
+@app.route('/api/stream', methods=['POST'])
+def stream():
+    data = request.get_json()
+    processes = []
+    response = []
+
+    with concurrent.futures.ProcessPoolExecutor() as executor:
+        for item in data:
+            token = ''
+            try: token = item['token']
+            except: token = ''
+            processes.append(
+                executor.submit(
+                    fetch_stream_obj,
+                    item['platform'],
+                    item['codec'],
+                    item['id'],
+                    token
+                )
+            )
+        for process in processes:
+            response.append(process.result())
+    return jsonify(response)
+
+# Get a users playlists with the option to include song data
 @app.route('/api/get_playlists', methods=['GET'])
 def get_playlists():
     platform = request.args.get('platform')
@@ -82,12 +100,11 @@ def get_playlists():
         user = request.args.get('user')
         playlists = spotify.get_playlists(token, user, scope == 'all')
 
-    # TODO Spotify Support
     # TODO Soundcloud Support
 
     return jsonify(playlists)
 
-
+# Get a list of songs within a specific playlist
 @app.route('/api/get_songs', methods=['GET'])
 def get_songs():
     platform = request.args.get('platform')
@@ -99,7 +116,9 @@ def get_songs():
     if platform == '1':
         songs = youtube.get_videos(token, playlistId)
 
-    # TODO Spotify Support
+    if platform == '2':
+        songs = spotify.get_songs(token, playlistId)
+
     # TODO Soundcloud Support
 
     return jsonify(songs)

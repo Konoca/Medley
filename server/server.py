@@ -89,16 +89,16 @@ def stream():
 def get_playlists():
     platform = request.args.get('platform')
     token = request.args.get('token')
-    scope = request.args.get('scope')
+    scope = request.args.get('scope') == 'all'
 
     playlists = []
 
     if platform == '1':
-        playlists = youtube.get_playlists(token)
+        playlists = youtube.get_playlists(token, scope)
 
     if platform == '2':
         user = request.args.get('user')
-        playlists = spotify.get_playlists(token, user, scope == 'all')
+        playlists = spotify.get_playlists(token, user, scope)
 
     # TODO Soundcloud Support
 

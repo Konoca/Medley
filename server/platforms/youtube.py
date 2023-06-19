@@ -4,8 +4,7 @@ import concurrent.futures
 
 API = 'https://youtube.googleapis.com/youtube/v3/'
 
-def get_playlists(token: str):
-    print('test')
+def get_playlists(token: str, scope: bool):
     headers = {'Authorization': f'Bearer {token}'}
 
     playlists = []
@@ -33,7 +32,8 @@ def get_playlists(token: str):
                     executor.submit(
                         _parse_playlist,
                         item,
-                        headers
+                        token,
+                        scope
                     )
                 )
 
@@ -114,7 +114,8 @@ def _parse_video(video, headers):
     }
 
 
-def _parse_playlist(playlist, headers):
+def _parse_playlist(playlist, token, scope):
+    headers = {'Authorization': f'Bearer {token}'}
     response = requests.get(API + 'playlistItems', headers=headers, params={
         'part': 'snippet',
         'playlistId': playlist['id']
@@ -124,11 +125,14 @@ def _parse_playlist(playlist, headers):
         return
     
     body = json.loads(response.content)
+    songs = body['pageInfo']['totalResults']
+    if scope: 
+        songs = get_videos(token, playlist['id'])
     
     return {
         'platform': '1',
         'playlist_id': playlist['id'],
         'playlist_name': playlist['snippet']['title'],
-        'songs': body['pageInfo']['totalResults'],
-        'thumbnail': playlist['snippet']['thumbnails']['high']['url']
+        'thumbnail': playlist['snippet']['thumbnails']['high']['url'],
+        'songs': songs
     }

@@ -2,16 +2,20 @@ from flask import Flask, request, jsonify
 import concurrent.futures
 import yt_dlp as yt
 
+import platform_functions.youtube as youtube
+
 app = Flask(__name__)
 
 @app.route('/api/stream', methods=['POST'])
 def stream():
     data = request.get_json()
+
+    processes = []
     response = []
-    response2 = []
+
     with concurrent.futures.ProcessPoolExecutor() as executor:
         for item in data:
-            response.append(
+            processes.append(
                 executor.submit(
                     fetch_stream_obj,
                     item['platform'],
@@ -19,9 +23,10 @@ def stream():
                     item['id']
                 )
             )
-        for item in response:
-            response2.append(item.result())
-    return jsonify(response2)
+        for process in processes:
+            response.append(process.result())
+    return jsonify(response)
+
 
 def fetch_stream_obj(platform: int, codec: str, id: str):
     if platform == 1:
@@ -43,6 +48,22 @@ def fetch_stream_obj(platform: int, codec: str, id: str):
         }
     except Exception as e:
         return
+
+
+@app.route('/api/get_playlists', methods=['GET'])
+def get_playlists():
+    platform = request.args.get('platform')
+    token = request.args.get('token')
+
+    playlists = []
+
+    if platform == '1':
+        playlists = youtube.get_playlists(token)
+
+    # TODO Spotify Support
+    # TODO Soundcloud Support
+
+    return jsonify(playlists)
         
 
 if __name__ == '__main__':

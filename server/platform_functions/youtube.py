@@ -40,7 +40,8 @@ def get_playlists(token: str):
             break
 
     for process in processes:
-        playlists.append(process.result())
+        result = process.result()
+        if result: playlists.append(result)
 
     return playlists
 
@@ -81,7 +82,8 @@ def get_videos(token: str, playlistId: str):
             break
 
     for process in processes:
-        videos.append(process.result())
+        result = process.result()
+        if result: videos.append(result)
     
     return videos
 

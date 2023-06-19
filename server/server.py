@@ -64,8 +64,25 @@ def get_playlists():
     # TODO Soundcloud Support
 
     return jsonify(playlists)
-        
+
+
+@app.route('/api/get_songs', methods=['GET'])
+def get_songs():
+    platform = request.args.get('platform')
+    token = request.args.get('token')
+    playlistId = request.args.get('playlistId')
+
+    songs = []
+
+    if platform == '1':
+        songs = youtube.get_videos(token, playlistId)
+
+    # TODO Spotify Support
+    # TODO Soundcloud Support
+
+    return jsonify(songs)
+
 
 if __name__ == '__main__':
-    app.run()
-    # app.run(host='0.0.0.0')
+    app.run(host='0.0.0.0')
+

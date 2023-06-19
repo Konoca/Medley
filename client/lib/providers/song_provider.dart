@@ -33,7 +33,8 @@ class CurrentlyPlaying with ChangeNotifier {
   bool _isCaching = false;
 
   bool get display => _display;
-  bool get isPlaying => _player.playing;
+  // bool get isPlaying => _player.playing;
+  bool get isPlaying => _isPlaying;
   bool get shuffle => _shuffle;
   bool get loop => _loop;
   double get volume => _volume;

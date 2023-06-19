@@ -90,14 +90,4 @@ class MedleyService {
       AudioPlatform.youtube(),
     );
   }
-
-  // Future<Playlist> getYoutubePlaylistSongs(
-  //     UserData user, Playlist playlist) async {
-  //   if (!user.youtubeAccount.isAuthenticated) return playlist;
-  //   return await _getSongs(
-  //     user.youtubeAccount.accessToken,
-  //     AudioPlatform.youtube(),
-  //     playlist,
-  //   );
-  // }
 }

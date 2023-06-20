@@ -90,7 +90,7 @@ class _HomePageState extends State<HomePage> {
     }
 
     if (playlists.spotify.isNotEmpty) {
-      w.add(platformLabel('assets/icons/spotofy.png', "Spotify"));
+      w.add(platformLabel('assets/icons/spotify.png', "Spotify"));
       w = platformList(w, playlists.spotify, columns);
     }
 

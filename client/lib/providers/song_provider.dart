@@ -6,6 +6,7 @@ import 'package:just_audio/just_audio.dart';
 import 'package:just_audio_background/just_audio_background.dart';
 import 'package:medley/objects/song.dart';
 import 'package:medley/objects/playlist.dart';
+import 'package:medley/providers/user_provider.dart';
 
 import '../services/medley.dart';
 
@@ -45,6 +46,8 @@ class CurrentlyPlaying with ChangeNotifier {
   bool get isCaching => _isCaching;
   AllPlaylists get allPlaylists => _allPlaylists;
 
+  late UserData user;
+
   CurrentlyPlaying() {
     _cache.fetchFromStorage();
     init();
@@ -83,7 +86,7 @@ class CurrentlyPlaying with ChangeNotifier {
       _setCaching(false);
     } on Exception {
       _setCaching(true);
-      _cache = await MedleyService().getStreamUrlBulk(_queue, _cache);
+      _cache = await MedleyService().getStreamUrlBulk(_queue, _cache, token: _song.platform.fetchToken(user));
       url = _cache.get(_song);
       _setCaching(false);
       _player.setAudioSource(

@@ -13,19 +13,16 @@ class SquareImage extends StatelessWidget {
   final bool isLoading;
 
   Widget img() {
-    try {
-      return Image(
+    return Image(
       image: image,
       height: size,
       width: size,
       fit: BoxFit.fitWidth,
     );
-    } catch (e) {
-      return SizedBox(
-        height: size,
-        width: size,
-      );
-    }
+      // return SizedBox(
+      //   height: size,
+      //   width: size,
+      // );
     
   }
 

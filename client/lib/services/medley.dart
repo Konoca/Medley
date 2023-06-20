@@ -10,7 +10,8 @@ import 'package:medley/providers/user_provider.dart';
 final String serverUrl = dotenv.env['SERVER_URL']!;
 
 class MedleyService {
-  Future<SongCache> getStreamUrlBulk(List<Song> songs, SongCache cache) async {
+  Future<SongCache> getStreamUrlBulk(List<Song> songs, SongCache cache,
+      {String token = ''}) async {
     final Uri url = Uri.http(
       serverUrl,
       '/api/stream',
@@ -23,6 +24,7 @@ class MedleyService {
           'platform': song.platform.id,
           'id': song.platformId,
           'codec': song.platform.codec,
+          'token': token,
         },
       );
     }
@@ -35,19 +37,21 @@ class MedleyService {
 
     final jsonBody = json.decode(response.body);
     for (Map<String, dynamic> s in jsonBody) {
+      if (s['id'] == null || s['platform'] == null || s['url'] == null) continue;
       cache.set(s['id'], s['platform'], s['url']);
     }
 
     return cache;
   }
 
-  _getPlaylists(String accessToken, AudioPlatform platform) async {
+  _getPlaylists(String accessToken, AudioPlatform platform, {user = ''}) async {
     final Uri url = Uri.http(
       serverUrl,
       '/api/get_playlists',
       {
         'platform': platform.id.toString(),
         'token': accessToken,
+        'user': user,
       },
     );
 
@@ -89,5 +93,14 @@ class MedleyService {
       user.youtubeAccount.accessToken,
       AudioPlatform.youtube(),
     );
+  }
+
+  Future<List<Playlist>> getSpotifyPlaylists(UserData user) async {
+    if (!user.spotifyAccount.isAuthenticated) return [];
+    return await _getPlaylists(
+        user.spotifyAccount.accessToken, AudioPlatform.spotify(),
+        user: await user.spotifyAccount.spotifyApi.me
+            .get()
+            .then((user) => user.id));
   }
 }

@@ -36,17 +36,23 @@ class SpotifyAuthService {
     }
 
     if (isMobile()) {
-      response = await showModalBottomSheet(
-        context: context,
-        isScrollControlled: true,
-        enableDrag: true,
-        useSafeArea: true,
-        backgroundColor: Colors.black,
+      // response = await showModalBottomSheet(
+      //   context: context,
+      //   isScrollControlled: true,
+      //   enableDrag: true,
+      //   useSafeArea: true,
+      //   backgroundColor: Colors.black,
+      //   builder: (context) => _SpotifyLoginWebViewMobile(
+      //     loginUrl: authUri,
+      //     redirectUrl: dotenv.env['SPOTIFY_REDIRECT_URL']!,
+      //   ),
+      // );
+      response = await Navigator.of(context).push(MaterialPageRoute(
         builder: (context) => _SpotifyLoginWebViewMobile(
           loginUrl: authUri,
           redirectUrl: dotenv.env['SPOTIFY_REDIRECT_URL']!,
         ),
-      );
+      ));
       return await clientFromResponse(response, grant);
     }
     if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
@@ -77,17 +83,16 @@ class SpotifyAuthService {
   }
 
   clientFromRefreshToken(String refreshToken, String accessToken) async {
-    final credentials = oauth2.Credentials(
-      accessToken,
+    final spotifyCredentials = sp.SpotifyApiCredentials(
+      dotenv.env['SPOTIFY_CLIENT_ID'],
+      dotenv.env['SPOTIFY_CLIENT_SECRET'],
+      accessToken: accessToken,
       refreshToken: refreshToken,
-      tokenEndpoint: Uri.parse('https://accounts.spotify.com/api/token'),
-    );
-    final client = oauth2.Client(
-      credentials,
-      identifier: dotenv.env['SPOTIFY_CLIENT_ID']!,
+      scopes: scopes,
+      expiration: DateTime.now(),
     );
 
-    final spotify = sp.SpotifyApi.fromClient(client);
+    final spotify = sp.SpotifyApi(spotifyCredentials);
     final user = await spotify.me.get();
     final newClient = await spotify.client;
 
@@ -105,21 +110,6 @@ class SpotifyAuthService {
     final split = storageValue.split('/');
     return clientFromRefreshToken(split[0], split[1]);
   }
-
-  // getPlaylists(sp.SpotifyApi spotify) async {
-  //   final response = []
-  //   final playlists = await spotify.playlists.me.all();
-
-  //   for (sp.PlaylistSimple pl in playlists) {
-  //     response.add(Playlist(
-  //       pl.name!,
-  //       AudioPlatform.spotify(),
-  //       pl.id!,
-  //       pl.images!.last.url!,
-
-  //     ));
-  //   }
-  // }
 }
 
 class _SpotifyLoginWebViewMobile extends StatelessWidget {

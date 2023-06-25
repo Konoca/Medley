@@ -1,13 +1,18 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
-import 'package:audioplayers/audioplayers.dart';
+// import 'package:audioplayers/audioplayers.dart';
+import 'package:medley/components/image.dart';
 
 import 'package:medley/components/media_controls.dart';
+import 'package:medley/components/text.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:medley/objects/platform.dart';
 import 'package:medley/objects/song.dart';
+import 'package:medley/providers/page_provider.dart';
 
 import 'package:medley/screens/home.dart';
+import 'package:medley/screens/playlist.dart';
 import 'package:medley/screens/search.dart';
 import 'package:medley/screens/account.dart';
 
@@ -22,16 +27,18 @@ class PageLayout extends StatefulWidget {
 }
 
 class _PageLayoutState extends State<PageLayout> {
-  int pageIndex = 0;
   double progress = 0;
   Duration songDuration = Duration.zero;
 
   Widget selectPage(BuildContext ctx) {
+    int pageIndex = context.watch<CurrentPage>().pageIndex;
     Widget p = const HomePage();
     if (pageIndex == 1) p = const SearchPage();
     if (pageIndex == 2) p = const AccountPage();
+    if (pageIndex == 3) p = const PlaylistPage();
     return Column(
       children: [
+        if (!isMobile()) desktopMenuBar(ctx),
         Expanded(
           flex: 1,
           child: p,
@@ -55,18 +62,20 @@ class _PageLayoutState extends State<PageLayout> {
     AudioPlayer player = ctx.watch<CurrentlyPlaying>().player;
     Song song = ctx.watch<CurrentlyPlaying>().song;
 
-    player.onDurationChanged.listen((duration) {
+    player.durationStream.listen((duration) {
       // work around until I figure out *why*
-      //apple devices misread the duration of .m4a
-      if (isApple() && song.platform.id == AudioPlatform.youtube().id) {
+      // apple devices misread the duration of .m4a
+      if (duration == null) return;
+
+      if (isApple() && song.platform.id == AudioPlatform.youtube().id && song.platform.codec == 'm4a') {
         duration =
             Duration(microseconds: (duration.inMicroseconds.toDouble() ~/ 2));
       }
 
-      setState(() => songDuration = duration);
+      setState(() => songDuration = duration!);
     });
 
-    player.onPositionChanged.listen((position) {
+    player.positionStream.listen((position) {
       if (songDuration == Duration.zero) {
         setState(() => progress = 0);
         return;
@@ -81,9 +90,9 @@ class _PageLayoutState extends State<PageLayout> {
       if (progress > 1) nextSong(ctx);
     });
 
-    player.onPlayerStateChanged.listen((state) {
-      if (songDuration == Duration.zero) return;
-      if (state != PlayerState.completed) return;
+    player.playerStateStream.listen((state) {
+      if (songDuration == Duration.zero || progress < 1) return;
+      if (state.processingState != ProcessingState.completed) return;
 
       nextSong(ctx);
     });
@@ -91,15 +100,40 @@ class _PageLayoutState extends State<PageLayout> {
     if (display || kIsWeb || (!Platform.isIOS && !Platform.isAndroid)) {
       return Column(
         children: [
-          LinearProgressIndicator(
-            color: Colors.white,
-            value: progress,
-          ),
+          durationBar(context),
           controlBar(context),
         ],
       );
     }
     return Container();
+  }
+
+  Widget durationBar(BuildContext context) {
+    if (isMobile()) {
+      return LinearProgressIndicator(
+        color: Colors.white,
+        value: progress,
+      );
+    }
+    return durationSlider(context);
+  }
+
+  Widget durationSlider(BuildContext context) {
+    return SliderTheme(
+      data: SliderThemeData(
+        overlayShape: SliderComponentShape.noOverlay,
+        thumbShape: SliderComponentShape.noThumb,
+      ),
+      child: Slider(
+        activeColor: Colors.white,
+        inactiveColor: const Color(0xFF404040),
+        value: progress,
+        onChanged: (v) => context.read<CurrentlyPlaying>().seek(
+              Duration(microseconds: (songDuration.inMicroseconds * v).toInt()),
+            ),
+        overlayColor: MaterialStateProperty.all(Colors.transparent),
+      ),
+    );
   }
 
   Widget controlBar(BuildContext context) {
@@ -122,14 +156,13 @@ class _PageLayoutState extends State<PageLayout> {
   }
 
   Widget mobileLayout() {
+    int pageIndex = context.watch<CurrentPage>().pageIndex;
     return Scaffold(
       backgroundColor: Colors.transparent,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        toolbarHeight: 20,
-        scrolledUnderElevation: 0,
+      body: Container(
+        padding: const EdgeInsets.only(top: 50),
+        child: selectPage(context),
       ),
-      body: selectPage(context),
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: const Color(0xFF1E1E1E),
         selectedItemColor: const Color(0xFF73A5FD),
@@ -147,11 +180,9 @@ class _PageLayoutState extends State<PageLayout> {
             label: 'Accounts',
           ),
         ],
-        currentIndex: pageIndex,
+        currentIndex: pageIndex < 3 ? pageIndex : 0,
         onTap: (value) {
-          setState(() {
-            pageIndex = value;
-          });
+          context.read<CurrentPage>().setPageIndex(value);
         },
       ),
     );
@@ -177,39 +208,38 @@ class _PageLayoutState extends State<PageLayout> {
           padding: const EdgeInsets.only(top: 40),
           child: Column(
             children: [
-              Image(
-                image: NetworkImage(
-                  context.watch<CurrentlyPlaying>().song.imgUrl,
-                ),
-                height: 300,
+              SquareImage(
+                NetworkImage(context.watch<CurrentlyPlaying>().song.imgUrl),
+                300,
+                isLoading: context.watch<CurrentlyPlaying>().isCaching,
               ),
               Container(
                 alignment: Alignment.center,
                 width: double.infinity,
-                child: Text(
+                child: ScrollingText(
                   context.watch<CurrentlyPlaying>().song.title,
-                  overflow: TextOverflow.fade,
+                  width: MediaQuery.of(context).size.width * 0.9,
                   style: const TextStyle(fontSize: 40),
+                  textAlign: TextAlign.center,
                 ),
               ),
               Container(
                 alignment: Alignment.center,
                 width: double.infinity,
-                child: Text(
+                child: ScrollingText(
                   context.watch<CurrentlyPlaying>().song.artist,
+                  width: MediaQuery.of(context).size.width * 0.9,
                   style: const TextStyle(
                     color: Color(0x80FFFFFF),
                     fontSize: 20,
                   ),
+                  textAlign: TextAlign.center,
                 ),
               ),
               Container(
                 padding: const EdgeInsets.only(top: 50),
                 margin: const EdgeInsets.symmetric(horizontal: 20),
-                child: LinearProgressIndicator(
-                  color: Colors.white,
-                  value: progress,
-                ),
+                child: durationSlider(context),
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -223,27 +253,59 @@ class _PageLayoutState extends State<PageLayout> {
     );
   }
 
+  Widget desktopMenuBar(BuildContext context) {
+    return Container(
+      height: 50,
+      padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 5),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              Container(
+                decoration: const BoxDecoration(
+                  borderRadius: BorderRadius.all(Radius.circular(45)),
+                  color: Color(0x80404040),
+                ),
+                child: IconButton(
+                  icon: const Icon(Icons.arrow_back_ios_new_rounded),
+                  onPressed: () => context.read<CurrentPage>().setPageIndex(0),
+                  // color: const Color(0xff1E1E1E),
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(
+                width: 250,
+                child: TextField(
+                  decoration: InputDecoration(
+                    border: UnderlineInputBorder(),
+                    // labelText: 'Search',
+                  ),
+                ),
+              ),
+            ],
+          ),
+          Container(
+            decoration: const BoxDecoration(
+              borderRadius: BorderRadius.all(Radius.circular(45)),
+              color: Color(0x80404040),
+            ),
+            child: IconButton(
+              icon: const Icon(Icons.account_circle),
+              onPressed: () => context.read<CurrentPage>().setPageIndex(2),
+              // color: const Color(0xff1E1E1E),
+              color: Colors.white,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget desktopLayout() {
     return Scaffold(
       backgroundColor: Colors.transparent,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        toolbarHeight: 50,
-      ),
       body: selectPage(context),
-      floatingActionButton: Container(
-        // color: const Color(0x80404040),
-        decoration: const BoxDecoration(
-          borderRadius: BorderRadius.all(Radius.circular(45)),
-          color: Color(0x80404040),
-        ),
-        child: IconButton(
-          icon: const Icon(Icons.account_circle),
-          onPressed: () => {},
-          color: const Color(0xff1E1E1E),
-        ),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
     );
   }
 

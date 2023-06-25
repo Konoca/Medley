@@ -6,7 +6,20 @@ class AudioPlatform {
   final int id;
   final String codec;
 
-  AudioPlatform(this.name, this.id, this.codec);
+  // AudioPlatform(this.name, this.id, this.codec);
+
+  factory AudioPlatform.fromId(id) {
+    switch (id.toString()) {
+      case '1':
+        return AudioPlatform.youtube();
+      case '2':
+        return AudioPlatform.spotify();
+      case '3':
+        return AudioPlatform.soundcloud();
+      default:
+        return AudioPlatform.empty();
+    }
+  }
 
   AudioPlatform.empty()
       : name = "",
@@ -16,7 +29,8 @@ class AudioPlatform {
   AudioPlatform.youtube()
       : name = "Youtube",
         id = 1,
-        codec = "m4a";
+        codec = "mp4";
+        // codec = "m4a";
 
   AudioPlatform.spotify()
       : name = "Spotify",

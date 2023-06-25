@@ -1,85 +1,89 @@
+import 'dart:convert';
+
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:medley/objects/platform.dart';
 import 'package:medley/objects/song.dart';
+
+const String customStorageKey = 'medley_playtlists_custom';
+const String youtubeStorageKey = 'medley_playtlists_youtube';
+const String spotifyStorageKey = 'medley_playtlists_spotify';
+const String soundcloudStorageKey = 'medley_playtlists_soundcloud';
 
 class Playlist {
   final String title;
   final AudioPlatform platform;
-  final int id;
   final String listId;
+  final String imgUrl;
   final int numberOfTracks;
-  final List<Song> songs;
+  List<Song> songs;
 
   Playlist(
     this.title,
     this.platform,
-    this.id,
     this.listId,
+    this.imgUrl,
     this.numberOfTracks,
     this.songs,
   );
 
-  Playlist.test()
-      : title = 'Favorites',
-        platform = AudioPlatform.empty(),
-        id = 1,
-        listId = '',
-        numberOfTracks = 2,
-        songs = [
-          Song.test(),
-          Song.test2(),
-        ];
+  factory Playlist.fromJsonWithSongs(Map<String, dynamic> json) {
+    AudioPlatform platform = AudioPlatform.fromId(json['platform']);
+    List<Song> songs =
+        json['songs'].map<Song>((s) => Song.fromJson(s, platform)).toList();
+    return Playlist(
+      json['playlist_name'],
+      platform,
+      json['playlist_id'],
+      json['thumbnail'],
+      songs.length,
+      songs,
+    );
+  }
 
-  Playlist.test2()
-      : title = 'Liked Songs',
-        platform = AudioPlatform.soundcloud(),
-        id = 2,
-        listId = '',
-        numberOfTracks = 1,
-        songs = [
-          Song.test2(),
-        ];
+  factory Playlist.fromJson(Map<String, dynamic> json) {
+    AudioPlatform platform = AudioPlatform.fromId(json['platform']);
+    return Playlist(
+      json['playlist_name'],
+      platform,
+      json['playlist_id'],
+      json['thumbnail'],
+      json['songs'],
+      [],
+    );
+  }
 
-  Playlist.test3()
-      : title = 'Test',
-        platform = AudioPlatform.soundcloud(),
-        id = 3,
-        listId = '',
-        numberOfTracks = 2,
-        songs = [
-          Song.test3(),
-          Song.test2(),
-        ];
-
-  Playlist.test4()
-      : title = 'Test',
-        platform = AudioPlatform.soundcloud(),
-        id = 3,
-        listId = '',
-        numberOfTracks = 2,
-        songs = [
-          Song.test3(),
-          Song.test3(),
-        ];
-  
-  Playlist.test5()
-      : title = 'Test',
-        platform = AudioPlatform.soundcloud(),
-        id = 3,
-        listId = '',
-        numberOfTracks = 3,
-        songs = [
-          Song.test(),
-          Song.test2(),
-          Song.test3(),
-        ];
+  factory Playlist.fromStorageMap(Map<String, dynamic> map) {
+    return Playlist(
+        map['playlist_name'],
+        AudioPlatform.fromId(map['platform_id']),
+        map['playlist_id'],
+        map['thumbnail'],
+        map['number_of_songs'],
+        map['songs'].map<Song>((s) => Song.fromStorageMap(s)).toList());
+  }
 
   Playlist.empty()
       : title = '',
         platform = AudioPlatform.empty(),
-        id = 0,
         listId = '',
+        imgUrl = '',
         numberOfTracks = 0,
         songs = [];
+
+  int findSongIndex(Song song) {
+    return songs.indexOf(song) - 1;
+  }
+
+  Map<String, dynamic> toStorageMap() {
+    return {
+      'playlist_name': title,
+      'platform_id': platform.id,
+      'playlist_id': listId,
+      'thumbnail': imgUrl,
+      'number_of_songs': numberOfTracks,
+      'songs': songs.map((song) => song.toStorageMap()).toList()
+    };
+  }
 }
 
 class AllPlaylists {
@@ -88,40 +92,68 @@ class AllPlaylists {
   List<Playlist> spotify = [];
   List<Playlist> soundcloud = [];
 
+  final FlutterSecureStorage _storage = const FlutterSecureStorage();
+
   AllPlaylists(this.custom, this.youtube, this.spotify, this.soundcloud);
 
-  AllPlaylists.fetch() {
-    // TODO fetch playlist data
-    custom = [
-      Playlist.test(),
-      Playlist.test2(),
-      Playlist.test3(),
-      Playlist.test4(),
-      Playlist.test5(),
-    ];
-    youtube = [
-      Playlist.test(),
-      Playlist.test2(),
-      Playlist.test(),
-      Playlist.test2(),
-    ];
-    spotify = [
-      // Playlist.test(),
-      // Playlist.test2(),
-      // Playlist.test(),
-      // Playlist.test2(),
-      // Playlist.test(),
-      // Playlist.test2(),
-    ];
-    soundcloud = [
-      Playlist.test(),
-      Playlist.test2(),
-      Playlist.test(),
-      Playlist.test2(),
-      Playlist.test(),
-      Playlist.test2(),
-      Playlist.test(),
-      Playlist.test2(),
-    ];
+  fetchFromStorage() async {
+    if (await _storage.containsKey(key: customStorageKey)) {
+      custom = jsonDecode(await _storage.read(key: customStorageKey) as String)
+          .map<Playlist>((pl) => Playlist.fromStorageMap(pl))
+          .toList();
+    }
+    if (await _storage.containsKey(key: youtubeStorageKey)) {
+      youtube = jsonDecode(await _storage.read(key: youtubeStorageKey) as String)
+          .map<Playlist>((pl) => Playlist.fromStorageMap(pl))
+          .toList();
+    }
+    if (await _storage.containsKey(key: spotifyStorageKey)) {
+      spotify = jsonDecode(await _storage.read(key: spotifyStorageKey) as String)
+          .map<Playlist>((pl) => Playlist.fromStorageMap(pl))
+          .toList();
+    }
+    if (await _storage.containsKey(key: soundcloudStorageKey)) {
+      soundcloud =
+          jsonDecode(await _storage.read(key: soundcloudStorageKey) as String)
+              .map<Playlist>((pl) => Playlist.fromStorageMap(pl))
+              .toList();
+    }
+    return this;
+  }
+
+  void updatePlaylistSongs(Playlist playlist) {
+    switch (playlist.platform.id) {
+      case 1:
+        youtube.where((pl) => playlist.listId == pl.listId).first.songs =
+            playlist.songs;
+        break;
+      case 2:
+        break;
+      case 3:
+        break;
+      default:
+    }
+  }
+
+  bool isEmpty() {
+    return (custom.isEmpty &&
+        youtube.isEmpty &&
+        spotify.isEmpty &&
+        soundcloud.isEmpty);
+  }
+
+  void save() {
+    _storage.write(
+        key: customStorageKey,
+        value: jsonEncode(custom.map((pl) => pl.toStorageMap()).toList()));
+    _storage.write(
+        key: youtubeStorageKey,
+        value: jsonEncode(youtube.map((pl) => pl.toStorageMap()).toList()));
+    _storage.write(
+        key: spotifyStorageKey,
+        value: jsonEncode(spotify.map((pl) => pl.toStorageMap()).toList()));
+    _storage.write(
+        key: soundcloudStorageKey,
+        value: jsonEncode(soundcloud.map((pl) => pl.toStorageMap()).toList()));
   }
 }

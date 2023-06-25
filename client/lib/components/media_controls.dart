@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'package:medley/components/image.dart';
+import 'package:medley/components/text.dart';
 
 import 'package:medley/providers/song_provider.dart';
 import 'package:provider/provider.dart';
@@ -86,27 +88,32 @@ class _NowPlayingState extends State<NowPlaying> {
     if (!context.watch<CurrentlyPlaying>().display) {
       return Container(
         height: 75,
-        width: 190,
+        width: 264,
         padding: const EdgeInsets.symmetric(horizontal: 10),
       );
     }
 
     return Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
-        Image(
-          image: NetworkImage(
-            context.watch<CurrentlyPlaying>().song.imgUrl,
-          ),
-          height: 75,
+        SquareImage(
+          NetworkImage(context.watch<CurrentlyPlaying>().song.imgUrl),
+          74,
+          isLoading: context.watch<CurrentlyPlaying>().isCaching,
         ),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 10),
+          width: isMobile() ? MediaQuery.of(context).size.width / 2 : 190,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(context.watch<CurrentlyPlaying>().song.title),
-              Text(
+              ScrollingText(
+                context.watch<CurrentlyPlaying>().song.title,
+                width: isMobile() ? MediaQuery.of(context).size.width / 2 : 190,
+              ),
+              ScrollingText(
                 context.watch<CurrentlyPlaying>().song.artist,
+                width: isMobile() ? MediaQuery.of(context).size.width / 2 : 190,
                 style: const TextStyle(
                   color: Color(0x80FFFFFF),
                 ),
@@ -173,6 +180,7 @@ class _VolumeState extends State<Volume> {
       height: 75,
       child: Row(
         children: [
+          Container(width: 48),
           const Icon(Icons.volume_up),
           Slider(
             activeColor: Colors.white,

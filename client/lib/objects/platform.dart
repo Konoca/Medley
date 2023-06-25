@@ -61,7 +61,7 @@ class AudioPlatform {
   AudioPlatform.spotify()
       : name = "Spotify",
         id = 2,
-        codec = "mp3";
+        codec = "mp4";
 
   AudioPlatform.soundcloud()
       : name = "Soundcloud",

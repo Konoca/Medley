@@ -36,23 +36,19 @@ class SpotifyAuthService {
     }
 
     if (isMobile()) {
-      // response = await showModalBottomSheet(
-      //   context: context,
-      //   isScrollControlled: true,
-      //   enableDrag: true,
-      //   useSafeArea: true,
-      //   backgroundColor: Colors.black,
-      //   builder: (context) => _SpotifyLoginWebViewMobile(
-      //     loginUrl: authUri,
-      //     redirectUrl: dotenv.env['SPOTIFY_REDIRECT_URL']!,
-      //   ),
-      // );
-      response = await Navigator.of(context).push(MaterialPageRoute(
-        builder: (context) => _SpotifyLoginWebViewMobile(
-          loginUrl: authUri,
-          redirectUrl: dotenv.env['SPOTIFY_REDIRECT_URL']!,
+      response = await Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => Scaffold(
+            appBar: AppBar(
+              title: const Text('Spotify'),
+            ),
+            body: _SpotifyLoginWebViewMobile(
+              loginUrl: authUri,
+              redirectUrl: dotenv.env['SPOTIFY_REDIRECT_URL']!,
+            ),
+          ),
         ),
-      ));
+      );
       return await clientFromResponse(response, grant);
     }
     if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {

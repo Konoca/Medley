@@ -92,6 +92,11 @@ class SongCache {
     return _cache.isEmpty;
   }
 
+  void clear() {
+    _cache = {};
+    save();
+  }
+
   void save() {
     _storage.write(
       key: _storageKey,

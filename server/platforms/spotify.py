@@ -18,7 +18,7 @@ def get_playlists(token: str, user: str, scope: bool):
                 processes.append(
                     executor.submit(_parse_playlist, token, i, scope)
                 )
-        
+
         for process in processes:
             result = process.result()
             if result: playlists.append(result)
@@ -45,7 +45,7 @@ def get_songs(token: str, playlistId: str):
                 'duration': i['track']['duration_ms']
             })
         return songs
-    else: 
+    else:
         return {'error': f'spotify songs error {response.status_code}'}
 
 
@@ -60,6 +60,9 @@ def _parse_playlist(token, playlist, scope):
         'platform': '2',
         'playlist_id': id,
         'playlist_name': playlist['name'],
-        'thumbnail': playlist['images'][0]['url'],
+        # 'thumbnail': playlist['images'][0]['url'],
+        # 'thumbnail': next(iter(playlist.get('images', []))).get('url', '')
+        'thumbnail': playlist['images'][0]['url'] if playlist.get('images') != [] else '',
         'songs': songs
     }
+

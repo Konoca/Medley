@@ -3,3 +3,4 @@ mysql-connector-python==8.0.33
 python-dotenv==1.0.0
 requests==2.31.0
 yt-dlp==2023.3.4
+youtube-search-python==1.6.6

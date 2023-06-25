@@ -4,7 +4,6 @@ import concurrent.futures
 import yt_dlp as yt
 from flask import Flask, request, jsonify
 from youtubesearchpython import VideosSearch
-from youtubesearchpython import Video
 
 import platforms.youtube as youtube
 import platforms.spotify as spotify

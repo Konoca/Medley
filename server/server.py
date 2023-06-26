@@ -11,27 +11,15 @@ import platforms.spotify as spotify
 app = Flask(__name__)
 
 # Fetch updated stream link for specific song and platform
-def fetch_stream_obj(platform: int, codec: str, id: str, token: str):
+def fetch_stream_obj(platform: int, codec: str, id: str):
     url = ''
     if platform == 1:
         url = f'https://youtube.com/watch?v={id}'
 
     if platform == 2:
-        # url = f'https://open.spotify.com/track/{id}'
-        url = f'https://api.spotify.com/v1/tracks/{id}'
-        headers = {'Authorization': f'Bearer {token}'}
-        response = requests.get(url, headers=headers)
-
-        if response.status_code != 200:
-            return
-
-        body = json.loads(response.content)
-
-        artists = ' '.join([artist.get('name', '') for artist in body.get('artists', [])])
-        title = body.get('name', '')
-        results = VideosSearch(f'{title} {artists}', limit=1)
+        results = VideosSearch(id, limit=1)
         result = results.result().get('result', [])
-        url = result[0].get('link', '') if result != [] else f'ytsearch1:{title} {artists}'
+        url = result[0].get('link', '') if result != [] else f'ytsearch1:{id}'
 
     if platform == 3:
         url = f'https://soundcloud.com/{id}'
@@ -41,7 +29,7 @@ def fetch_stream_obj(platform: int, codec: str, id: str, token: str):
         return {
             'id': id,
             'platform': platform,
-            'url': data['entries'][0]['url'] if url.startswith('ytsearch:1') else data['url']
+            'url': data['entries'][0]['url'] if url.startswith('ytsearch1:') else data['url']
         }
     except Exception as e:
         print('ERROR', e, data)
@@ -65,7 +53,6 @@ def stream():
                     item['platform'],
                     item['codec'],
                     item['id'],
-                    item.get('token', '')
                 )
             )
         for process in processes:

@@ -125,16 +125,16 @@ def _parse_song(song):
         i = song['track'] if song.get('track') else song
         artists = ', '.join([artist.get('name', '') for artist in i.get('artists', [])])
         title = i.get('name', '')
+        album = i.get('album', {}).get('name', '')
         return {
             'platform': '2',
-            'song_id': f'{title} {artists}',
+            'song_id': f'{album} {title} {artists}',
             'song_title': i['name'],
             'artist': artists,
             'thumbnail': i['album']['images'][0]['url'] if i.get('album', {}).get('images', []) != [] else '',
             'duration': i['duration_ms']
         }
     except Exception as e:
-        # print(song)
         print(e)
         return
 

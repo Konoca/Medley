@@ -1,5 +1,3 @@
-import json
-import requests
 import concurrent.futures
 import yt_dlp as yt
 from flask import Flask, request, jsonify
@@ -32,7 +30,6 @@ def fetch_stream_obj(platform: int, codec: str, id: str):
             'url': data['entries'][0]['url'] if url.startswith('ytsearch1:') else data['url']
         }
     except Exception as e:
-        print('ERROR', e, data)
         return
 
 

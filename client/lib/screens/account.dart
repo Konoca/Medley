@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:medley/objects/user.dart';
+import 'package:medley/providers/song_provider.dart';
 import 'package:medley/providers/user_provider.dart';
 import 'package:provider/provider.dart';
 
@@ -10,11 +11,12 @@ class AccountPage extends StatefulWidget {
   State<AccountPage> createState() => _AccountPageState();
 }
 
-Widget accountCard(String name, Account account, Function onTapAuth, Function onTapDeAuth) {
+Widget accountCard(BuildContext context, String name, Account account, Function onTapAuth, Function onTapDeAuth) {
   return InkWell(
     onTap: () {
       if (!account.isAuthenticated) onTapAuth();
       if (account.isAuthenticated) onTapDeAuth();
+      context.read<CurrentlyPlaying>().user = context.read<UserData>();
     },
     child: Container(
       decoration: BoxDecoration(
@@ -51,24 +53,28 @@ class _AccountPageState extends State<AccountPage> {
       children: [
         // const Text("Accounts", style: TextStyle(fontSize: 30)),
         accountCard(
+          context,
           'Medley',
           userData.user,
           () {},
           () {},
         ),
         accountCard(
+          context,
           'Youtube',
           userData.youtubeAccount,
           () async => await userData.loginYoutube(),
           () async => await userData.logoutYoutube(context),
         ),
         accountCard(
+          context,
           'Spotify',
           userData.spotifyAccount,
           () async => await userData.loginSpotify(context),
-          () {},
+          () async => await userData.logoutSpotify(context),
         ),
         accountCard(
+          context,
           'Soundcloud',
           userData.soundcloudAccount,
           () async => await userData.loginSoundcloud(context),

@@ -142,7 +142,7 @@ List<Widget> controlGroup(BuildContext context, double iconSize) {
     ),
     IconButton(
       onPressed: () => context.read<CurrentlyPlaying>().togglePlaying(),
-      icon: context.watch<CurrentlyPlaying>().isPlaying
+      icon: context.watch<CurrentlyPlaying>().isPlaying && context.watch<CurrentlyPlaying>().player.playing
           ? const Icon(Icons.pause_circle)
           : const Icon(Icons.play_circle),
       iconSize: iconSize * 2,

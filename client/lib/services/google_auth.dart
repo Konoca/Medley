@@ -114,8 +114,6 @@ class GoogleAuthService {
   }
 
   _fetchRefreshToken(String accessToken, String serverAuthCode) async {
-    // final url = Uri.parse('https://accounts.google.com/o/oauth2/token');
-    // final url = Uri.parse('https://oauth2.googleapis.com/token');
     final url = Uri.https(
       'oauth2.googleapis.com',
       'token',
@@ -128,36 +126,9 @@ class GoogleAuthService {
       }
     );
 
-    // final response = await http.post(
-    //   url,
-    //   headers: {'Content-type': 'application/json'},
-    //   // body: jsonEncode({
-    //   //   'access_type': 'offline',
-    //   //   // 'tokenType': serverAuthCode,
-    //   //   'grant_type': 'code',
-    //   //   'client_secret': dotenv.env['GOOGLE_CLIENT_SECRET']!,
-    //   //   'client_id': dotenv.env['GOOGLE_CLIENT_ID']!,
-    //   //   'redirect_uri': dotenv.env['GOOGLE_REDIRECT_URL']!
-    //   // })
-    //   body: jsonEncode({
-    //     'code': serverAuthCode,
-    //     'grant_type': 'authorization_code',
-    //     'client_secret': dotenv.env['GOOGLE_CLIENT_SECRET']!,
-    //     'client_id': dotenv.env['GOOGLE_CLIENT_ID']!,
-    //     'redirect_uri': dotenv.env['GOOGLE_REDIRECT_URL']!
-    //   })
-    // );
     final response = await http.post(url);
-    // if (response.statusCode != 200) {
-    //   throw 'Refresh token request failed: ${response.statusCode}';
-    // }
 
     final data = Map<String, dynamic>.of(jsonDecode(response.body));
-    // if (data.containsKey('refreshToken')) {
-    //   // here is your refresh token, store it in a secure way
-    // } else {
-    //   throw 'No refresh token in response';
-    // }
     return data['refresh_token'];
   }
 

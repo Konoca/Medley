@@ -17,6 +17,8 @@ Future<void> main() async {
   if (!kIsWeb && (Platform.isWindows || Platform.isMacOS || Platform.isLinux)) {
     await windowManager.ensureInitialized();
     WindowManager.instance.setMinimumSize(const Size(800, 600));
+
+    WidgetsFlutterBinding.ensureInitialized();
   }
   if (kIsWeb || Platform.isAndroid || Platform.isIOS || Platform.isMacOS) {
     await JustAudioBackground.init(
@@ -41,6 +43,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     context.read<UserData>().login();
+    context.read<CurrentlyPlaying>().user = context.read<UserData>();
     return MaterialApp(
       title: 'Medley',
       theme: ThemeData.dark(useMaterial3: true),

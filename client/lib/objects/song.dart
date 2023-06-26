@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:medley/objects/iso8601_duration.dart';
 import 'package:medley/objects/platform.dart';
 
 class Song {
@@ -26,7 +25,7 @@ class Song {
       json['song_title'],
       json['artist'],
       json['thumbnail'],
-      ISO8601Duration(json['duration']).toDuration().toString(),
+      platform.parseDuration(json),
       json['song_id'],
       platform,
     );
@@ -91,6 +90,11 @@ class SongCache {
 
   bool isEmpty() {
     return _cache.isEmpty;
+  }
+
+  void clear() {
+    _cache = {};
+    save();
   }
 
   void save() {

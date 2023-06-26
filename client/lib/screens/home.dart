@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:medley/components/image.dart';
 import 'package:medley/components/text.dart';
 import 'package:medley/providers/page_provider.dart';
+import 'package:medley/providers/song_provider.dart';
 import 'package:medley/providers/user_provider.dart';
 
 import 'package:provider/provider.dart';
@@ -90,7 +91,7 @@ class _HomePageState extends State<HomePage> {
     }
 
     if (playlists.spotify.isNotEmpty) {
-      w.add(platformLabel('assets/icons/spotofy.png', "Spotify"));
+      w.add(platformLabel('assets/icons/spotify.png', "Spotify"));
       w = platformList(w, playlists.spotify, columns);
     }
 
@@ -149,10 +150,11 @@ class _HomePageState extends State<HomePage> {
         children: fetchPlaylists(context),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () => context.read<CurrentlyPlaying>().cache.clear(),
         backgroundColor: const Color(0x8073A5FD),
         mini: true,
-        child: const Icon(Icons.add),
+        // child: const Icon(Icons.add),
+        child: const Text('Clear cache'),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.miniEndFloat,
     );

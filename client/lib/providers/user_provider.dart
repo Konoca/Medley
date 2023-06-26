@@ -6,6 +6,7 @@ import 'package:medley/objects/playlist.dart';
 import 'package:medley/objects/user.dart';
 import 'package:medley/services/google_auth.dart';
 import 'package:medley/services/medley.dart';
+import 'package:medley/services/spotify_auth.dart';
 
 class UserData with ChangeNotifier {
   bool _isAuthenticated = false;
@@ -14,7 +15,7 @@ class UserData with ChangeNotifier {
 
   UserAccount _user = UserAccount.blank();
   YoutubeAccount _yt = YoutubeAccount.blank();
-  final SpotifyAccount _sp = SpotifyAccount.blank();
+  SpotifyAccount _sp = SpotifyAccount.blank();
   final SoundcloudAccount _sc = SoundcloudAccount.blank();
 
   bool get isAuthenticated => _isAuthenticated;
@@ -30,6 +31,8 @@ class UserData with ChangeNotifier {
     switch (platform.id) {
       case 1:
         return _yt.accessToken;
+      case 2:
+        return _sp.accessToken;
       default:
         return '';
     }
@@ -38,8 +41,8 @@ class UserData with ChangeNotifier {
   Future<bool> login() async {
     _user = UserAccount(1, true, '');
     _isAuthenticated = _user.isAuthenticated;
-    fetchPlaylistsFromStorage();
     fetchUsersFromStorage();
+    fetchPlaylistsFromStorage();
     return _isAuthenticated;
   }
 
@@ -90,19 +93,41 @@ class UserData with ChangeNotifier {
   }
 
   Future<bool> loginSpotify(BuildContext context) async {
+    _sp = await SpotifyAuthService().signIn(context);
+    _storage.write(
+        key: _sp.storageKey, value: "${_sp.refreshToken}/${_sp.accessToken}");
+    fetchPlaylists();
+    notifyListeners();
+    return _sp.isAuthenticated;
+  }
+
+  Future<bool> logoutSpotify(BuildContext context) async {
     showDialog(
         context: context,
         builder: (context) {
           return AlertDialog(
-            title: const Text('Error'),
-            content:
-                const Text('Logging into spotify is not currently supported.'),
+            title: const Text('Are you sure'),
+            content: const Text(
+                'Are you sure you want to log out of your spotify account?'),
             actions: <Widget>[
               TextButton(
                 style: TextButton.styleFrom(
                   textStyle: Theme.of(context).textTheme.labelLarge,
                 ),
-                child: const Text('Ok'),
+                child: const Text('Yes'),
+                onPressed: () {
+                  _sp = SpotifyAccount.blank();
+                  _storage.delete(key: _sp.storageKey);
+                  fetchPlaylists();
+                  notifyListeners();
+                  Navigator.of(context).pop();
+                },
+              ),
+              TextButton(
+                style: TextButton.styleFrom(
+                  textStyle: Theme.of(context).textTheme.labelLarge,
+                ),
+                child: const Text('Cancel'),
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
@@ -111,8 +136,7 @@ class UserData with ChangeNotifier {
           );
         });
 
-    notifyListeners();
-    return false;
+    return _sp.isAuthenticated;
   }
 
   Future<bool> loginSoundcloud(BuildContext context) async {
@@ -144,6 +168,7 @@ class UserData with ChangeNotifier {
   Future<AllPlaylists> fetchPlaylists() async {
     _allPlaylists.youtube =
         await MedleyService().getYoutubePlaylists(this, scope: 'all');
+    _allPlaylists.spotify = await MedleyService().getSpotifyPlaylists(this);
     _allPlaylists.save();
     notifyListeners();
     return _allPlaylists;
@@ -156,7 +181,16 @@ class UserData with ChangeNotifier {
 
   void fetchUsersFromStorage() async {
     if (await _storage.containsKey(key: _yt.storageKey)) {
-      _yt = await GoogleAuthService().getAccountFromRefreshToken(await _storage.read(key: _yt.storageKey) as String);
+      _yt = await GoogleAuthService().getAccountFromRefreshToken(
+          await _storage.read(key: _yt.storageKey) as String);
+    }
+    if (await _storage.containsKey(key: _sp.storageKey)) {
+      _sp = await SpotifyAuthService().clientFromStorage(
+          await _storage.read(key: _sp.storageKey) as String);
+      _storage.write(
+        key: _sp.storageKey,
+        value: "${_sp.refreshToken}/${_sp.accessToken}",
+      );
     }
     notifyListeners();
   }

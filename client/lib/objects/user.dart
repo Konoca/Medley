@@ -1,4 +1,5 @@
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:spotify/spotify.dart';
 
 class Account {
   bool _isAuthenticated;
@@ -50,7 +51,25 @@ class YoutubeAccount extends Account {
 }
 
 class SpotifyAccount extends Account {
+  late SpotifyApi _spotify;
+  SpotifyApi get spotifyApi => _spotify;
+
+  late String _accessToken;
+  String get accessToken => _accessToken;
+
+  late String _picture;
+  String get picture => _picture;
+
+  late String _refreshToken;
+  String get refreshToken => _refreshToken;
+
+  String get storageKey => 'medley_accounts_spotify';
+
   SpotifyAccount(
+    this._spotify,
+    this._refreshToken,
+    this._accessToken,
+    // this._picture,
     super._isAuthenticated,
     super._userName,
   );

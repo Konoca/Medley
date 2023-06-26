@@ -1,6 +1,10 @@
 // import 'dart:io';
 // import 'package:flutter/foundation.dart';
 
+import 'package:medley/providers/user_provider.dart';
+
+import 'iso8601_duration.dart';
+
 class AudioPlatform {
   final String name;
   final int id;
@@ -21,6 +25,28 @@ class AudioPlatform {
     }
   }
 
+  String parseDuration(input) {
+    switch (id) {
+      case 1:
+        return ISO8601Duration(input['duration']).toDuration().toString();
+      case 2:
+        return Duration(milliseconds: input['duration']).toString();
+      default:
+        return input['duration'].toString();
+    }
+  }
+
+  String fetchToken(UserData user) {
+    switch (id) {
+      case 1:
+        return user.youtubeAccount.accessToken;
+      case 2:
+        return user.spotifyAccount.accessToken;
+      default:
+        return '';
+    }
+  }
+
   AudioPlatform.empty()
       : name = "",
         id = 0,
@@ -35,7 +61,7 @@ class AudioPlatform {
   AudioPlatform.spotify()
       : name = "Spotify",
         id = 2,
-        codec = "mp3";
+        codec = "mp4";
 
   AudioPlatform.soundcloud()
       : name = "Soundcloud",

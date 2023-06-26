@@ -12,17 +12,26 @@ class SquareImage extends StatelessWidget {
   final double size;
   final bool isLoading;
 
+  Widget img() {
+    return Image(
+      image: image,
+      height: size,
+      width: size,
+      fit: BoxFit.fitWidth,
+    );
+      // return SizedBox(
+      //   height: size,
+      //   width: size,
+      // );
+    
+  }
+
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
       return Stack(
         children: [
-          Image(
-            image: image,
-            height: size,
-            width: size,
-            fit: BoxFit.fitWidth,
-          ),
+          img(),
           Container(
             alignment: Alignment.center,
             height: size,
@@ -32,11 +41,6 @@ class SquareImage extends StatelessWidget {
         ],
       );
     }
-    return Image(
-      image: image,
-      height: size,
-      width: size,
-      fit: BoxFit.fitWidth,
-    );
+    return img();
   }
 }

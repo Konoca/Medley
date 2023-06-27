@@ -25,7 +25,7 @@ class Song {
     return Song(
       json['song_title'],
       json['artist'],
-      json['thumbnail'] != '' ? json['thumbanil'] : pl.imgUrl,
+      json['thumbnail'] != '' ? json['thumbnail'] : pl.imgUrl,
       platform.parseDuration(json),
       json['song_id'],
       platform,

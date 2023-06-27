@@ -80,7 +80,7 @@ class MedleyService {
 
     playlist.songs = json
         .decode(response.body)
-        .map<Song>((s) => Song.fromJson(s, playlist.platform))
+        .map<Song>((s) => Song.fromJson(s, playlist.platform, playlist))
         .toList();
 
     return playlist;

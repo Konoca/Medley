@@ -78,6 +78,7 @@ class SpotifyAccount extends Account {
 }
 
 class SoundcloudAccount extends Account {
+  String get storageKey => 'medley_accounts_soundcloud';
   SoundcloudAccount(
     super._isAuthenticated,
     super._userName,

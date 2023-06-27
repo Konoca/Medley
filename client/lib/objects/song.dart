@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:medley/objects/platform.dart';
+import 'package:medley/objects/playlist.dart';
 
 class Song {
   final String title;
@@ -20,11 +21,11 @@ class Song {
     this.platform,
   );
 
-  factory Song.fromJson(Map<String, dynamic> json, AudioPlatform platform) {
+  factory Song.fromJson(Map<String, dynamic> json, AudioPlatform platform, Playlist pl) {
     return Song(
       json['song_title'],
       json['artist'],
-      json['thumbnail'],
+      json['thumbnail'] != '' ? json['thumbanil'] : pl.imgUrl,
       platform.parseDuration(json),
       json['song_id'],
       platform,

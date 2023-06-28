@@ -1,5 +1,3 @@
-// ignore_for_file: unused_field, prefer_final_fields
-
 import 'dart:math';
 
 import 'package:audio_service/audio_service.dart';
@@ -82,6 +80,11 @@ class CustomAudioPlayer extends BaseAudioHandler
   @override
   seek(Duration position) {
     _progress = position;
+    playbackState.add(
+      playbackState.value.copyWith(
+        updatePosition: position,
+      ),
+    );
     notifyListeners();
     return _player.seek(position);
   }
@@ -142,7 +145,7 @@ class CustomAudioPlayer extends BaseAudioHandler
       );
       url = _cache.get(_song);
       _setCaching(false);
-      
+
       playMediaItem(item);
     }
 

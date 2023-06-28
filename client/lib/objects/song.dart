@@ -71,13 +71,13 @@ class Song {
 
     List<String> secondsParts = parts[2].split('.');
     int seconds = int.parse(secondsParts[0]);
-    int milliseconds = int.parse(secondsParts[1]);
+    // int milliseconds = int.parse(secondsParts[1]);
     
     return Duration(
       hours: hours,
       minutes: minutes,
-      seconds: seconds,
-      milliseconds: milliseconds,
+      seconds: seconds + 1,
+      // milliseconds: milliseconds,
     );
   }
 }

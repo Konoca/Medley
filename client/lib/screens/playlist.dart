@@ -96,8 +96,11 @@ class _PlaylistPageState extends State<PlaylistPage> {
     //     songList(pl),
     //   ],
     // );
-    return ListView.builder(itemBuilder: (context, index) {
-      return songTile(pl, pl.songs[index]);
-    });
+    return ListView.builder(
+        itemCount: pl.numberOfTracks,
+        cacheExtent: 10,
+        itemBuilder: (context, index) {
+          return songTile(pl, pl.songs[index]);
+        });
   }
 }

@@ -150,11 +150,12 @@ class _HomePageState extends State<HomePage> {
         children: fetchPlaylists(context),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => context.read<CurrentlyPlaying>().cache.clear(),
+        // onPressed: () => context.read<CurrentlyPlaying>().cache.clear(),
+        onPressed: () => context.read<UserData>().createCustomPlaylist(context),
         backgroundColor: const Color(0x8073A5FD),
         mini: true,
-        // child: const Icon(Icons.add),
-        child: const Text('Clear cache'),
+        child: const Icon(Icons.add),
+        // child: const Text('Clear cache'),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.miniEndFloat,
     );

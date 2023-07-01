@@ -159,7 +159,8 @@ class UserData with ChangeNotifier {
               ),
             ],
           );
-        });
+        },
+    );
 
     notifyListeners();
     return false;
@@ -187,6 +188,7 @@ class UserData with ChangeNotifier {
     if (await _storage.containsKey(key: _sp.storageKey)) {
       _sp = await SpotifyAuthService().clientFromStorage(
           await _storage.read(key: _sp.storageKey) as String);
+      _storage.delete(key: _sp.storageKey);
       _storage.write(
         key: _sp.storageKey,
         value: "${_sp.refreshToken}/${_sp.accessToken}",
@@ -201,5 +203,58 @@ class UserData with ChangeNotifier {
     _allPlaylists.updatePlaylistSongs(playlist);
     _allPlaylists.save();
     notifyListeners();
+  }
+
+  void createCustomPlaylist(BuildContext context) async {
+    String value = '';
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Create Custom Playlist'),
+          content: TextField(
+            decoration: const InputDecoration(
+              // border: OutlineInputBorder(),
+              border: UnderlineInputBorder(),
+              hintText: 'Enter playlist name',
+            ),
+            onChanged: (text) => value = text,
+          ),
+          actions: <Widget>[
+            TextButton(
+              style: TextButton.styleFrom(
+                textStyle: Theme.of(context).textTheme.labelLarge,
+              ),
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              style: TextButton.styleFrom(
+                textStyle: Theme.of(context).textTheme.labelLarge,
+              ),
+              child: const Text('Create'),
+              onPressed: () {
+                final existing = _allPlaylists.custom.where((pl) => pl.listId == value).toList();
+                if (existing.isEmpty) {
+                  _allPlaylists.custom.add(Playlist(
+                    value,
+                    AudioPlatform.empty(),
+                    value,
+                    '',
+                    0,
+                    [],
+                  ));
+                  _allPlaylists.save();
+                  notifyListeners();
+                }
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 }

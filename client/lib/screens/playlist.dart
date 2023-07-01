@@ -17,14 +17,6 @@ class PlaylistPage extends StatefulWidget {
 }
 
 class _PlaylistPageState extends State<PlaylistPage> {
-  Widget songList(Playlist pl) {
-    return Column(
-      children: pl.songs.map<Widget>((song) {
-        return songTile(pl, song);
-      }).toList(),
-    );
-  }
-
   Widget songTile(Playlist pl, Song song) {
     return InkWell(
       onTap: () {
@@ -91,16 +83,11 @@ class _PlaylistPageState extends State<PlaylistPage> {
       );
     }
 
-    // return ListView(
-    //   children: [
-    //     songList(pl),
-    //   ],
-    // );
     return ListView.builder(
-        itemCount: pl.numberOfTracks,
-        cacheExtent: 10,
-        itemBuilder: (context, index) {
-          return songTile(pl, pl.songs[index]);
-        });
+      itemCount: pl.songs.length,
+      itemBuilder: (context, index) {
+        return songTile(pl, pl.songs[index]);
+      },
+    );
   }
 }

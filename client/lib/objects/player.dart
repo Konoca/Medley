@@ -103,6 +103,8 @@ class CustomAudioPlayer extends BaseAudioHandler
       systemActions: const {
         MediaAction.seek,
         MediaAction.play,
+        MediaAction.setShuffleMode,
+        MediaAction.setRepeatMode,
       },
       androidCompactActionIndices: const [0, 1, 2],
       processingState: AudioProcessingState.ready,
@@ -123,18 +125,16 @@ class CustomAudioPlayer extends BaseAudioHandler
 
     String url = _cache.get(_song);
 
-    final item = MediaItem(
-      id: url,
-      title: _song.title,
-      artist: _song.artist,
-      artUri: Uri.parse(_song.imgUrl),
-      album: _playlist.title,
-      duration: _song.toDuration(),
-    );
-
     try {
       if (url == '') throw Exception();
-      await playMediaItem(item);
+      await playMediaItem(MediaItem(
+        id: url,
+        title: _song.title,
+        artist: _song.artist,
+        artUri: Uri.parse(_song.imgUrl),
+        album: _playlist.title,
+        duration: _song.toDuration(),
+      ));
       _setCaching(false);
     } on Exception {
       _setCaching(true);
@@ -146,7 +146,14 @@ class CustomAudioPlayer extends BaseAudioHandler
       url = _cache.get(_song);
       _setCaching(false);
 
-      playMediaItem(item);
+      playMediaItem(MediaItem(
+        id: url,
+        title: _song.title,
+        artist: _song.artist,
+        artUri: Uri.parse(_song.imgUrl),
+        album: _playlist.title,
+        duration: _song.toDuration(),
+      ));
     }
 
     _determineNextIndex();

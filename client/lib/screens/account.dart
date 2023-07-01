@@ -16,7 +16,7 @@ Widget accountCard(BuildContext context, String name, Account account, Function 
     onTap: () {
       if (!account.isAuthenticated) onTapAuth();
       if (account.isAuthenticated) onTapDeAuth();
-      context.read<CurrentlyPlaying>().user = context.read<UserData>();
+      context.read<CurrentlyPlaying>().setUser(context.read<UserData>());
     },
     child: Container(
       decoration: BoxDecoration(

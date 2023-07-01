@@ -67,7 +67,9 @@ class _PageLayoutState extends State<PageLayout> {
       // apple devices misread the duration of .m4a
       if (duration == null) return;
 
-      if (isApple() && song.platform.id == AudioPlatform.youtube().id && song.platform.codec == 'm4a') {
+      if (isApple() &&
+          song.platform.id == AudioPlatform.youtube().id &&
+          song.platform.codec == 'm4a') {
         duration =
             Duration(microseconds: (duration.inMicroseconds.toDouble() ~/ 2));
       }
@@ -128,8 +130,14 @@ class _PageLayoutState extends State<PageLayout> {
         activeColor: Colors.white,
         inactiveColor: const Color(0xFF404040),
         value: progress,
-        onChanged: (v) => context.read<CurrentlyPlaying>().seek(
-              Duration(microseconds: (songDuration.inMicroseconds * v).toInt()),
+        onChanged: (v) {},
+        // onChanged: (v) => context.read<CurrentlyPlaying>().seek(
+        //       Duration(microseconds: (songDuration.inMicroseconds * v).toInt()),
+        //     ),
+        onChangeEnd: (v) => context.read<CurrentlyPlaying>().seek(
+              Duration(
+                microseconds: (songDuration.inMicroseconds * v).toInt(),
+              ),
             ),
         overlayColor: MaterialStateProperty.all(Colors.transparent),
       ),

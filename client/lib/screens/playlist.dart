@@ -3,6 +3,7 @@ import 'package:medley/components/image.dart';
 import 'package:medley/components/media_controls.dart';
 import 'package:medley/components/text.dart';
 import 'package:medley/objects/playlist.dart';
+import 'package:medley/objects/song.dart';
 import 'package:medley/providers/page_provider.dart';
 import 'package:medley/providers/song_provider.dart';
 import 'package:medley/providers/user_provider.dart';
@@ -16,61 +17,57 @@ class PlaylistPage extends StatefulWidget {
 }
 
 class _PlaylistPageState extends State<PlaylistPage> {
-  Widget songList(Playlist pl) {
-    return Column(
-      children: pl.songs.map<Widget>((song) {
-        return InkWell(
-          onTap: () {
-            context.read<CurrentlyPlaying>().setPlaylist(pl, song: song);
-          },
-          child: Container(
-            decoration: BoxDecoration(
-              color: song == context.watch<CurrentlyPlaying>().song
-                  ? const Color(0xFF1E1E1E)
-                  : const Color(0x801E1E1E),
-            ),
-            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  Widget songTile(Playlist pl, Song song) {
+    return InkWell(
+      onTap: () {
+        context.read<CurrentlyPlaying>().setPlaylist(pl, song: song);
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          color: song == context.watch<CurrentlyPlaying>().song
+              ? const Color(0xFF1E1E1E)
+              : const Color(0x801E1E1E),
+        ),
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
               children: [
-                Row(
-                  children: [
-                    SquareImage(
-                      NetworkImage(song.imgUrl),
-                      50,
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          ScrollingText(
-                            song.title,
-                            width: MediaQuery.sizeOf(context).width * 0.75,
-                            style: const TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          ScrollingText(
-                            song.artist,
-                            width: MediaQuery.sizeOf(context).width * 0.75,
-                          ),
-                        ],
-                      ),
-                    ),
-                    if (!isMobile())
-                      Text(
-                        song.duration.substring(0, song.duration.length - 7),
-                        style: const TextStyle(
-                          color: Color(0x80FFFFFF),
-                        ),
-                        textAlign: TextAlign.right,
-                      ),
-                  ],
+                SquareImage(
+                  NetworkImage(song.imgUrl),
+                  50,
                 ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      ScrollingText(
+                        song.title,
+                        width: MediaQuery.sizeOf(context).width * 0.75,
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      ScrollingText(
+                        song.artist,
+                        width: MediaQuery.sizeOf(context).width * 0.75,
+                      ),
+                    ],
+                  ),
+                ),
+                if (!isMobile())
+                  Text(
+                    song.duration.substring(0, song.duration.length - 7),
+                    style: const TextStyle(
+                      color: Color(0x80FFFFFF),
+                    ),
+                    textAlign: TextAlign.right,
+                  ),
               ],
             ),
-          ),
-        );
-      }).toList(),
+          ],
+        ),
+      ),
     );
   }
 
@@ -86,10 +83,11 @@ class _PlaylistPageState extends State<PlaylistPage> {
       );
     }
 
-    return ListView(
-      children: [
-        songList(pl),
-      ],
+    return ListView.builder(
+      itemCount: pl.songs.length,
+      itemBuilder: (context, index) {
+        return songTile(pl, pl.songs[index]);
+      },
     );
   }
 }

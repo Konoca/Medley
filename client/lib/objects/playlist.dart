@@ -28,8 +28,11 @@ class Playlist {
 
   factory Playlist.fromJsonWithSongs(Map<String, dynamic> json) {
     AudioPlatform platform = AudioPlatform.fromId(json['platform']);
-    List<Song> songs =
-        json['songs'].map<Song>((s) => Song.fromJson(s, platform)).toList();
+    Playlist temp = Playlist(json['playlist_name'], platform,
+        json['playlist_id'], json['thumbnail'], 0, []);
+    List<Song> songs = json['songs']
+        .map<Song>((s) => Song.fromJson(s, platform, temp))
+        .toList();
     return Playlist(
       json['playlist_name'],
       platform,
@@ -103,14 +106,16 @@ class AllPlaylists {
           .toList();
     }
     if (await _storage.containsKey(key: youtubeStorageKey)) {
-      youtube = jsonDecode(await _storage.read(key: youtubeStorageKey) as String)
-          .map<Playlist>((pl) => Playlist.fromStorageMap(pl))
-          .toList();
+      youtube =
+          jsonDecode(await _storage.read(key: youtubeStorageKey) as String)
+              .map<Playlist>((pl) => Playlist.fromStorageMap(pl))
+              .toList();
     }
     if (await _storage.containsKey(key: spotifyStorageKey)) {
-      spotify = jsonDecode(await _storage.read(key: spotifyStorageKey) as String)
-          .map<Playlist>((pl) => Playlist.fromStorageMap(pl))
-          .toList();
+      spotify =
+          jsonDecode(await _storage.read(key: spotifyStorageKey) as String)
+              .map<Playlist>((pl) => Playlist.fromStorageMap(pl))
+              .toList();
     }
     if (await _storage.containsKey(key: soundcloudStorageKey)) {
       soundcloud =
@@ -128,8 +133,12 @@ class AllPlaylists {
             playlist.songs;
         break;
       case 2:
+        spotify.where((pl) => playlist.listId == pl.listId).first.songs =
+            playlist.songs;
         break;
       case 3:
+        soundcloud.where((pl) => playlist.listId == pl.listId).first.songs =
+            playlist.songs;
         break;
       default:
     }

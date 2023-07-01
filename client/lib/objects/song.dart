@@ -1,7 +1,9 @@
 import 'dart:convert';
+import 'dart:ffi';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:medley/objects/platform.dart';
+import 'package:medley/objects/playlist.dart';
 
 class Song {
   final String title;
@@ -20,11 +22,12 @@ class Song {
     this.platform,
   );
 
-  factory Song.fromJson(Map<String, dynamic> json, AudioPlatform platform) {
+  factory Song.fromJson(
+      Map<String, dynamic> json, AudioPlatform platform, Playlist pl) {
     return Song(
       json['song_title'],
       json['artist'],
-      json['thumbnail'],
+      json['thumbnail'] != '' ? json['thumbnail'] : pl.imgUrl,
       platform.parseDuration(json),
       json['song_id'],
       platform,
@@ -59,6 +62,23 @@ class Song {
       'song_id': platformId,
       'platform_id': platform.id
     };
+  }
+
+  Duration toDuration() {
+    List<String> parts = duration.split(':');
+    int hours = int.parse(parts[0]);
+    int minutes = int.parse(parts[1]);
+
+    List<String> secondsParts = parts[2].split('.');
+    int seconds = int.parse(secondsParts[0]);
+    // int milliseconds = int.parse(secondsParts[1]);
+    
+    return Duration(
+      hours: hours,
+      minutes: minutes,
+      seconds: seconds + 1,
+      // milliseconds: milliseconds,
+    );
   }
 }
 
@@ -113,7 +133,8 @@ class SongCache {
 
   fetchFromStorage() async {
     if (!await _storage.containsKey(key: _storageKey)) return;
-    _cache = jsonDecode(await _storage.read(key: _storageKey) as String).map<SongCacheKey, String>(
+    _cache = jsonDecode(await _storage.read(key: _storageKey) as String)
+        .map<SongCacheKey, String>(
       (String key, dynamic value) => MapEntry(
         SongCacheKey.fromString(key),
         value.toString(),

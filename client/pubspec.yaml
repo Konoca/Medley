@@ -48,11 +48,11 @@ dependencies:
   just_audio_windows: ^0.2.0
   just_audio_mpv: ^0.1.6
   audio_session: ^0.1.16
-  just_audio_background: ^0.0.1-beta.10
   webview_flutter: ^4.2.2
   spotify: ^0.11.0
   oauth2: ^2.0.2
   desktop_webview_window: ^0.2.0
+  audio_service: ^0.18.10
 
 dev_dependencies:
   flutter_test:

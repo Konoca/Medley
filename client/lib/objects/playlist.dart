@@ -10,12 +10,13 @@ const String spotifyStorageKey = 'medley_playtlists_spotify';
 const String soundcloudStorageKey = 'medley_playtlists_soundcloud';
 
 class Playlist {
-  final String title;
-  final AudioPlatform platform;
+  String title;
+  AudioPlatform platform;
   final String listId;
-  final String imgUrl;
+  String imgUrl;
   final int numberOfTracks;
   List<Song> songs;
+  bool isDownloaded = false;
 
   Playlist(
     this.title,
@@ -24,6 +25,9 @@ class Playlist {
     this.imgUrl,
     this.numberOfTracks,
     this.songs,
+    [
+      this.isDownloaded = false,
+    ]
   );
 
   factory Playlist.fromJsonWithSongs(Map<String, dynamic> json) {
@@ -40,6 +44,7 @@ class Playlist {
       json['thumbnail'],
       songs.length,
       songs,
+      json['is_downloaded'],
     );
   }
 
@@ -52,6 +57,7 @@ class Playlist {
       json['thumbnail'],
       json['songs'],
       [],
+      json['is_downloaded'] ?? false,
     );
   }
 
@@ -62,7 +68,9 @@ class Playlist {
         map['playlist_id'],
         map['thumbnail'],
         map['number_of_songs'],
-        map['songs'].map<Song>((s) => Song.fromStorageMap(s)).toList());
+        map['songs'].map<Song>((s) => Song.fromStorageMap(s)).toList(),
+        map['is_downloaded'],
+    );
   }
 
   Playlist.empty()
@@ -84,7 +92,8 @@ class Playlist {
       'playlist_id': listId,
       'thumbnail': imgUrl,
       'number_of_songs': numberOfTracks,
-      'songs': songs.map((song) => song.toStorageMap()).toList()
+      'songs': songs.map((song) => song.toStorageMap()).toList(),
+      'is_downloaded': isDownloaded,
     };
   }
 }

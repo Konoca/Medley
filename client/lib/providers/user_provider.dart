@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:medley/objects/platform.dart';
@@ -7,6 +9,7 @@ import 'package:medley/objects/user.dart';
 import 'package:medley/services/google_auth.dart';
 import 'package:medley/services/medley.dart';
 import 'package:medley/services/spotify_auth.dart';
+import 'package:path_provider/path_provider.dart';
 
 class UserData with ChangeNotifier {
   bool _isAuthenticated = false;
@@ -256,5 +259,94 @@ class UserData with ChangeNotifier {
         );
       },
     );
+  }
+  void removePlaylist(Playlist pl) async {
+    switch (pl.platform.id) {
+      case 0:
+        _allPlaylists.custom.remove(pl);
+        break;
+      case 1:
+        _allPlaylists.youtube.remove(pl);
+        break;
+      case 2:
+        _allPlaylists.spotify.remove(pl);
+        break;
+      case 3:
+        _allPlaylists.soundcloud.remove(pl);
+        break;
+      default:
+        break;
+    }
+    final Directory dir = await getStorageDirectory();
+    final Directory listDir = Directory('${dir.path}/${pl.listId}');
+    if (await listDir.exists()) await listDir.delete(recursive: true);
+    _allPlaylists.save();
+    notifyListeners();
+  }
+
+  void savePlaylist(Playlist pl) async {
+    if (pl.songs.isEmpty) pl = await MedleyService().getSongs(getToken(pl.platform), pl);
+    Playlist newPl = Playlist(pl.title, AudioPlatform.empty(), pl.listId, pl.imgUrl, pl.numberOfTracks, pl.songs);
+
+    await downloadPlaylist(newPl, pl.platform);
+    newPl.isDownloaded = true;
+
+    _allPlaylists.custom.add(newPl);
+    _allPlaylists.save();
+    notifyListeners();
+  }
+
+  void editPlaylist(BuildContext context, Playlist pl) {
+    String playlistName = pl.title;
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Edit Playlist'),
+          content: TextField(
+            decoration: const InputDecoration(
+              border: UnderlineInputBorder(),
+              hintText: 'Enter playlist name',
+            ),
+            onChanged: (text) => playlistName = text,
+          ),
+          actions: <Widget>[
+            TextButton(
+              style: TextButton.styleFrom(
+                textStyle: Theme.of(context).textTheme.labelLarge,
+              ),
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              style: TextButton.styleFrom(
+                textStyle: Theme.of(context).textTheme.labelLarge,
+              ),
+              child: const Text('Save'),
+              onPressed: () {
+                pl.title = playlistName;
+                _allPlaylists.save();
+                notifyListeners();
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> downloadPlaylist(Playlist pl, AudioPlatform oldPlatform) async {
+    final dir = await getStorageDirectory();
+    await MedleyService().downloadSongs(dir, pl, oldPlatform);
+    return;
+  }
+
+  Future<Directory> getStorageDirectory() async {
+    final Directory dir = await getApplicationDocumentsDirectory();
+    return dir;
   }
 }

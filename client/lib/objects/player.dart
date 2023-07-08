@@ -91,7 +91,8 @@ class CustomAudioPlayer extends BaseAudioHandler
 
   @override
   playMediaItem(MediaItem mediaItem) async {
-    await _player.setAudioSource(AudioSource.uri(Uri.parse(mediaItem.id)));
+    if (mediaItem.id.startsWith('/')) await _player.setAudioSource(AudioSource.file(mediaItem.id));
+    else await _player.setAudioSource(AudioSource.uri(Uri.parse(mediaItem.id)));
     super.mediaItem.add(mediaItem);
     play();
     playbackState.add(PlaybackState(
@@ -124,6 +125,10 @@ class CustomAudioPlayer extends BaseAudioHandler
     if (_player.playing) _player.stop();
 
     String url = _cache.get(_song);
+    if (_playlist.isDownloaded) {
+      final dir = await user.getStorageDirectory();
+      url = dir.path + '/${_playlist.listId}/${_song.platformId}.${_song.platform.codec}';
+    }
 
     try {
       if (url == '') throw Exception();

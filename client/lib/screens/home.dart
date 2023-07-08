@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:medley/components/image.dart';
 import 'package:medley/components/text.dart';
+import 'package:medley/objects/platform.dart';
 import 'package:medley/providers/page_provider.dart';
 import 'package:medley/providers/song_provider.dart';
 import 'package:medley/providers/user_provider.dart';
@@ -23,6 +24,40 @@ class _HomePageState extends State<HomePage> {
       onTap: () {
         context.read<CurrentPage>().setPlaylist(pl);
         context.read<CurrentPage>().setPageIndex(3);
+      },
+      onSecondaryTap: () {}, // TODO implement for desktop/web
+      onLongPress: () {
+        showModalBottomSheet(context: context, builder: (builder) {
+          return Wrap(
+            children: [
+              pl.platform != AudioPlatform.empty() ? ListTile(
+                leading: const Icon(Icons.save),
+                title: const Text('Save'),
+                onTap: () {
+                  context.read<UserData>().savePlaylist(pl);
+                  Navigator.of(context).pop();
+                }
+              ) : Container(),
+              ListTile(
+                leading: const Icon(Icons.edit),
+                title: const Text('Edit'),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  context.read<UserData>().editPlaylist(context, pl);
+                }
+              ),
+              ListTile(
+                leading: const Icon(Icons.delete),
+                title: const Text('Remove'),
+                onTap: () {
+                  context.read<UserData>().removePlaylist(pl);
+                  Navigator.of(context).pop();
+                }
+              ),
+              const ListTile(),
+            ],
+          );
+        });
       },
       borderRadius: BorderRadius.circular(15),
       child: Container(

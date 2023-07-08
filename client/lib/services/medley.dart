@@ -1,6 +1,8 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:dio/dio.dart';
 
 import 'package:medley/objects/platform.dart';
 import 'package:medley/objects/playlist.dart';
@@ -102,5 +104,39 @@ class MedleyService {
         user: await user.spotifyAccount.spotifyApi.me
             .get()
             .then((user) => user.id));
+  }
+
+  downloadSongs(Directory path, Playlist pl, AudioPlatform oldPlatform) async {
+    final Uri url = Uri.http(
+      serverUrl,
+      '/api/stream',
+    );
+
+    List<Map<String, dynamic>> body = [];
+    for (Song song in pl.songs) {
+      body.add(
+        {
+          'platform': song.platform.id,
+          'id': song.platformId,
+          'codec': song.platform.codec,
+        },
+      );
+    }
+
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode(body),
+    );
+    final jsonBody = json.decode(response.body);
+
+    Dio dio = Dio();
+    for (Map<String, dynamic> s in jsonBody) {
+      if (s['id'] == null || s['platform'] == null || s['url'] == null) continue;
+      // final sResponse = await http.get(Uri.parse(s['url']));
+      // final File file = File('$path/${pl.listId}/${s["id"]}.${pl.platform.codec}');
+      // file.writeAsBytes(sResponse.bodyBytes);
+      dio.download(s['url'], '${path.path}/${pl.listId}/${s["id"]}.${oldPlatform.codec}');
+    }
   }
 }

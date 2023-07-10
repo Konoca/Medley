@@ -63,6 +63,47 @@ def get_playlists(token: str, user: str, scope: bool):
         if not url:
             break
 
+    # liked songs
+    url = API + 'me/tracks'
+    tracks = 0
+    while True:
+        response = requests.get(url, headers=headers)
+        if (response.status_code != 200):
+            print(url)
+            print(json.loads(response.content))
+            break
+
+        body = json.loads(response.content)
+        items = body.get('items', [])
+
+        if scope:
+            track_list = []
+            with concurrent.futures.ProcessPoolExecutor() as executor:
+                for item in items:
+                    track_list.append(
+                        executor.submit(
+                            _parse_song,
+                            item
+                        )
+                    )
+            for process in track_list:
+                result = process.result()
+                if result: tracks.append(result)
+        else:
+            tracks = tracks + len(items)
+
+        url = body.get('next', '')
+        if not url:
+            break
+
+    playlists.append({
+        'platform': '2',
+        'playlist_id': 'me',
+        'playlist_name': 'Liked Songs',
+        'thumbnail': '',
+        'songs': tracks
+    })
+
     for process in processes:
         result = process.result()
         if result: playlists.append(result)
@@ -75,6 +116,7 @@ def get_songs(token: str, playlistId: str):
 
     songs = []
     processes = []
+
     url = API + f'{playlistId}/tracks'
 
     while True:

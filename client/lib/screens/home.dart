@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:medley/components/image.dart';
 import 'package:medley/components/text.dart';
@@ -18,6 +20,11 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   double playlistSize = 200;
+
+  Widget getImage(Playlist pl) {
+    if (pl.isDownloaded) return SquareImage(FileImage(File(pl.imgUrl)), playlistSize - 50);
+    return SquareImage(NetworkImage(pl.imgUrl), playlistSize - 50);
+  }
 
   Widget createTile(Playlist pl) {
     return InkWell(
@@ -72,10 +79,7 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           children: [
             const Spacer(),
-            SquareImage(
-              NetworkImage(pl.imgUrl),
-              playlistSize - 50,
-            ),
+            getImage(pl),
             ScrollingText(
               pl.title,
               padding: const EdgeInsets.symmetric(horizontal: 15),
@@ -110,7 +114,7 @@ class _HomePageState extends State<HomePage> {
             alignment: Alignment.center,
             height: 500,
             child: const Text(
-              'Get started by linking an account!',
+              'Get started by linking an account under settings, or by creating a new playlist!',
               style: TextStyle(color: Color(0xFF1E1E1E)),
             ))
       ];

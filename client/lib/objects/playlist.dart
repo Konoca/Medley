@@ -161,15 +161,22 @@ class AllPlaylists {
   }
 
   void save() {
+    _storage.delete(key: customStorageKey);
     _storage.write(
         key: customStorageKey,
         value: jsonEncode(custom.map((pl) => pl.toStorageMap()).toList()));
+
+    _storage.delete(key: youtubeStorageKey);
     _storage.write(
         key: youtubeStorageKey,
         value: jsonEncode(youtube.map((pl) => pl.toStorageMap()).toList()));
+
+    _storage.delete(key: spotifyStorageKey);
     _storage.write(
         key: spotifyStorageKey,
         value: jsonEncode(spotify.map((pl) => pl.toStorageMap()).toList()));
+
+    _storage.delete(key: soundcloudStorageKey);
     _storage.write(
         key: soundcloudStorageKey,
         value: jsonEncode(soundcloud.map((pl) => pl.toStorageMap()).toList()));

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:medley/components/image.dart';
 import 'package:medley/components/media_controls.dart';
@@ -17,6 +19,11 @@ class PlaylistPage extends StatefulWidget {
 }
 
 class _PlaylistPageState extends State<PlaylistPage> {
+  Widget getImage(Song s) {
+    if (s.isDownloaded) return SquareImage(FileImage(File(s.imgUrl)), 50);
+    return SquareImage(NetworkImage(s.imgUrl), 50);
+  }
+
   Widget songTile(Playlist pl, Song song) {
     return InkWell(
       onTap: () {
@@ -34,10 +41,7 @@ class _PlaylistPageState extends State<PlaylistPage> {
           children: [
             Row(
               children: [
-                SquareImage(
-                  NetworkImage(song.imgUrl),
-                  50,
-                ),
+                getImage(song),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10),
                   child: Column(

@@ -288,7 +288,7 @@ class UserData with ChangeNotifier {
     if (pl.songs.isEmpty) pl = await MedleyService().getSongs(getToken(pl.platform), pl);
     Playlist newPl = Playlist(pl.title, AudioPlatform.empty(), pl.listId, pl.imgUrl, pl.numberOfTracks, pl.songs);
 
-    await downloadPlaylist(newPl, pl.platform);
+    newPl = await downloadPlaylist(newPl, pl.platform);
     newPl.isDownloaded = true;
 
     _allPlaylists.custom.add(newPl);
@@ -339,10 +339,10 @@ class UserData with ChangeNotifier {
     );
   }
 
-  Future<void> downloadPlaylist(Playlist pl, AudioPlatform oldPlatform) async {
+  Future<Playlist> downloadPlaylist(Playlist pl, AudioPlatform oldPlatform) async {
     final dir = await getStorageDirectory();
-    await MedleyService().downloadSongs(dir, pl, oldPlatform);
-    return;
+    pl = await MedleyService().downloadSongs(dir, pl, oldPlatform);
+    return pl;
   }
 
   Future<Directory> getStorageDirectory() async {

@@ -196,6 +196,21 @@ class _PageLayoutState extends State<PageLayout> {
     );
   }
 
+  Widget getImage(CurrentlyPlaying cp) {
+    if (cp.song.isDownloaded) {
+      return SquareImage(
+        FileImage(File(cp.song.imgUrl)),
+        300,
+        isLoading: cp.isCaching,
+      );
+    }
+    return SquareImage(
+      NetworkImage(cp.song.imgUrl),
+      300,
+      isLoading: cp.isCaching,
+    );
+  }
+
   void mobileControlDrawer(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -216,11 +231,7 @@ class _PageLayoutState extends State<PageLayout> {
           padding: const EdgeInsets.only(top: 40),
           child: Column(
             children: [
-              SquareImage(
-                NetworkImage(context.watch<CurrentlyPlaying>().song.imgUrl),
-                300,
-                isLoading: context.watch<CurrentlyPlaying>().isCaching,
-              ),
+              getImage(context.watch<CurrentlyPlaying>()),
               Container(
                 alignment: Alignment.center,
                 width: double.infinity,

@@ -131,12 +131,31 @@ class MedleyService {
     final jsonBody = json.decode(response.body);
 
     Dio dio = Dio();
+    List<Future<dynamic>> downloading = [];
     for (Map<String, dynamic> s in jsonBody) {
       if (s['id'] == null || s['platform'] == null || s['url'] == null) continue;
-      // final sResponse = await http.get(Uri.parse(s['url']));
-      // final File file = File('$path/${pl.listId}/${s["id"]}.${pl.platform.codec}');
-      // file.writeAsBytes(sResponse.bodyBytes);
-      dio.download(s['url'], '${path.path}/${pl.listId}/${s["id"]}.${oldPlatform.codec}');
+      downloading.add(
+        dio.download(s['url'], '${path.path}/${pl.listId}/${s["id"]}.${oldPlatform.codec}')
+      );
     }
+
+    // song imgs
+    for (Song s in pl.songs) {
+      String fileExt = s.imgUrl.split('.').last;
+      String downloadPath = '${path.path}/${pl.listId}/${s.platformId}.$fileExt';
+      downloading.add(dio.download(s.imgUrl, downloadPath));
+      s.imgUrl = downloadPath;
+      s.isDownloaded = true;
+    }
+
+    // playlist img
+    String fileExt = pl.imgUrl.split('.').last;
+    String downloadPath = '${path.path}/${pl.listId}/${pl.listId}.$fileExt';
+    downloading.add(dio.download(pl.imgUrl, downloadPath));
+    pl.imgUrl = downloadPath;
+
+    await Future.wait(downloading);
+
+    return pl;
   }
 }

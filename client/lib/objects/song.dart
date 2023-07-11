@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:ffi';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:medley/objects/platform.dart';
@@ -8,10 +7,11 @@ import 'package:medley/objects/playlist.dart';
 class Song {
   final String title;
   final String artist;
-  final String imgUrl;
+  String imgUrl;
   final String duration;
   final String platformId;
   final AudioPlatform platform;
+  bool isDownloaded = false;
 
   Song(
     this.title,
@@ -20,6 +20,9 @@ class Song {
     this.duration,
     this.platformId,
     this.platform,
+    [
+      this.isDownloaded = false,
+    ]
   );
 
   factory Song.fromJson(
@@ -31,6 +34,7 @@ class Song {
       platform.parseDuration(json),
       json['song_id'],
       platform,
+      json['is_downloaded'] ?? false,
     );
   }
 
@@ -42,6 +46,7 @@ class Song {
       map['duration'] ?? '',
       map['song_id'],
       AudioPlatform.fromId(map['platform_id']),
+      map['is_downloaded'],
     );
   }
 
@@ -60,7 +65,8 @@ class Song {
       'thumbnail': imgUrl,
       'duration': duration,
       'song_id': platformId,
-      'platform_id': platform.id
+      'platform_id': platform.id,
+      'is_downloaded': isDownloaded,
     };
   }
 
@@ -72,7 +78,7 @@ class Song {
     List<String> secondsParts = parts[2].split('.');
     int seconds = int.parse(secondsParts[0]);
     // int milliseconds = int.parse(secondsParts[1]);
-    
+
     return Duration(
       hours: hours,
       minutes: minutes,

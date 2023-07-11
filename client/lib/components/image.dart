@@ -19,11 +19,6 @@ class SquareImage extends StatelessWidget {
       width: size,
       fit: BoxFit.fitWidth,
     );
-      // return SizedBox(
-      //   height: size,
-      //   width: size,
-      // );
-    
   }
 
   @override

@@ -15,6 +15,7 @@ import 'package:medley/screens/home.dart';
 import 'package:medley/screens/playlist.dart';
 import 'package:medley/screens/search.dart';
 import 'package:medley/screens/account.dart';
+import 'package:medley/screens/settings.dart';
 
 import 'package:medley/providers/song_provider.dart';
 import 'package:provider/provider.dart';
@@ -34,7 +35,8 @@ class _PageLayoutState extends State<PageLayout> {
     int pageIndex = context.watch<CurrentPage>().pageIndex;
     Widget p = const HomePage();
     if (pageIndex == 1) p = const SearchPage();
-    if (pageIndex == 2) p = const AccountPage();
+    // if (pageIndex == 2) p = const AccountPage();
+    if (pageIndex == 2) p = const SettingsPage();
     if (pageIndex == 3) p = const PlaylistPage();
     return Column(
       children: [

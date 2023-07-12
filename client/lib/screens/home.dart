@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:medley/components/image.dart';
 import 'package:medley/components/text.dart';
@@ -36,8 +37,12 @@ class _HomePageState extends State<HomePage> {
         context.read<CurrentPage>().setPlaylist(pl);
         context.read<CurrentPage>().setPageIndex(3);
       },
-      onSecondaryTap: () {}, // TODO implement for desktop/web
+      onSecondaryTap: () {
+        // TODO implement for desktop/web
+        if (kIsWeb) return;
+      },
       onLongPress: () {
+        if (kIsWeb) return;
         showModalBottomSheet(context: context, builder: (builder) {
           return Wrap(
             children: [

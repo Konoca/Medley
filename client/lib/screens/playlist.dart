@@ -25,7 +25,7 @@ class _PlaylistPageState extends State<PlaylistPage> {
   }
 
   Color getColor(Song s) {
-    if (s.isDownloaded) return Colors.lightGreen;
+    if (s.isDownloaded) return const Color(0xFF64F3D3);
     return Colors.transparent;
   }
 

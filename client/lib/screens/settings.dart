@@ -47,13 +47,13 @@ class _SettingsPageState extends State<SettingsPage> {
 
   accounts(UserData userData) {
     return [
-      accountCard(
-        context,
-        'Medley',
-        userData.user,
-      () {},
-      () {},
-      ),
+      // accountCard(
+      //   context,
+      //   'Medley',
+      //   userData.user,
+      // () {},
+      // () {},
+      // ),
       accountCard(
         context,
         'Youtube',

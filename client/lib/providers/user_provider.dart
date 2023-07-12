@@ -52,7 +52,7 @@ class UserData with ChangeNotifier {
   Future<bool> loginYoutube() async {
     _yt = await GoogleAuthService().signInToGoogle();
     _storage.write(key: _yt.storageKey, value: _yt.refreshToken);
-    fetchPlaylists();
+    fetchPlaylists(yt: true);
     notifyListeners();
     return _yt.isAuthenticated;
   }
@@ -74,7 +74,7 @@ class UserData with ChangeNotifier {
                 onPressed: () {
                   _yt = YoutubeAccount.blank();
                   _storage.delete(key: _yt.storageKey);
-                  fetchPlaylists();
+                  fetchPlaylists(yt: true);
                   notifyListeners();
                   Navigator.of(context).pop();
                 },
@@ -99,7 +99,7 @@ class UserData with ChangeNotifier {
     _sp = await SpotifyAuthService().signIn(context);
     _storage.write(
         key: _sp.storageKey, value: "${_sp.refreshToken}/${_sp.accessToken}");
-    fetchPlaylists();
+    fetchPlaylists(spotify: true);
     notifyListeners();
     return _sp.isAuthenticated;
   }
@@ -121,7 +121,7 @@ class UserData with ChangeNotifier {
                 onPressed: () {
                   _sp = SpotifyAccount.blank();
                   _storage.delete(key: _sp.storageKey);
-                  fetchPlaylists();
+                  fetchPlaylists(spotify: true);
                   notifyListeners();
                   Navigator.of(context).pop();
                 },
@@ -169,10 +169,11 @@ class UserData with ChangeNotifier {
     return false;
   }
 
-  Future<AllPlaylists> fetchPlaylists() async {
-    _allPlaylists.youtube =
-        await MedleyService().getYoutubePlaylists(this, scope: 'all');
-    _allPlaylists.spotify = await MedleyService().getSpotifyPlaylists(this);
+  Future<AllPlaylists> fetchPlaylists({yt = false, spotify = false, soundcloud = false}) async {
+    if (yt) _allPlaylists.youtube = await MedleyService().getYoutubePlaylists(this);
+    if (spotify) _allPlaylists.spotify = await MedleyService().getSpotifyPlaylists(this);
+    // TODO soundcloud
+
     _allPlaylists.save();
     notifyListeners();
     return _allPlaylists;

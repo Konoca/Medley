@@ -24,6 +24,11 @@ class _PlaylistPageState extends State<PlaylistPage> {
     return SquareImage(NetworkImage(s.imgUrl), 50);
   }
 
+  Color getColor(Song s) {
+    if (s.isDownloaded) return Colors.lightGreen;
+    return Colors.transparent;
+  }
+
   Widget songTile(Playlist pl, Song song) {
     return InkWell(
       onTap: () {
@@ -34,6 +39,13 @@ class _PlaylistPageState extends State<PlaylistPage> {
           color: song == context.watch<CurrentlyPlaying>().song
               ? const Color(0xFF1E1E1E)
               : const Color(0x801E1E1E),
+          border: Border(
+            left: BorderSide(
+              color: song.isDownloaded
+                ? const Color(0xFF64F3D3)
+                : Colors.transparent,
+            ),
+          ),
         ),
         padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
         child: Row(

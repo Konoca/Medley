@@ -286,11 +286,19 @@ class UserData with ChangeNotifier {
 
   void savePlaylist(Playlist pl) async {
     if (pl.songs.isEmpty) pl = await MedleyService().getSongs(getToken(pl.platform), pl);
-    Playlist newPl = Playlist(pl.title, AudioPlatform.empty(), pl.listId, pl.imgUrl, pl.numberOfTracks, pl.songs);
+    // Playlist newPl = Playlist(pl.title, AudioPlatform.empty(), pl.listId, pl.imgUrl, pl.numberOfTracks, pl.songs);
+    Playlist newPl = Playlist.copy(pl);
+    newPl.platform = AudioPlatform.empty();
+
+    Playlist temp = Playlist.copy(pl);
+    temp.isDownloading = true;
+    _allPlaylists.custom.add(temp);
+    notifyListeners();
 
     newPl = await downloadPlaylist(newPl, pl.platform);
     newPl.isDownloaded = true;
 
+    _allPlaylists.custom.remove(temp);
     _allPlaylists.custom.add(newPl);
     _allPlaylists.save();
     notifyListeners();

@@ -5,7 +5,6 @@ import 'package:medley/components/image.dart';
 import 'package:medley/components/text.dart';
 import 'package:medley/objects/platform.dart';
 import 'package:medley/providers/page_provider.dart';
-import 'package:medley/providers/song_provider.dart';
 import 'package:medley/providers/user_provider.dart';
 
 import 'package:provider/provider.dart';
@@ -22,8 +21,13 @@ class _HomePageState extends State<HomePage> {
   double playlistSize = 200;
 
   Widget getImage(Playlist pl) {
-    if (pl.isDownloaded) return SquareImage(FileImage(File(pl.imgUrl)), playlistSize - 50);
-    return SquareImage(NetworkImage(pl.imgUrl), playlistSize - 50);
+    if (pl.isDownloaded) return SquareImage(FileImage(File(pl.imgUrl)), playlistSize - 50, isLoading: pl.isDownloading);
+    return SquareImage(NetworkImage(pl.imgUrl), playlistSize - 50, isLoading: pl.isDownloading);
+  }
+
+  Color getColor(Playlist pl) {
+    if (pl.isDownloaded) return const Color(0xFF64F3D3);
+    return Colors.transparent;
   }
 
   Widget createTile(Playlist pl) {
@@ -71,6 +75,7 @@ class _HomePageState extends State<HomePage> {
         decoration: BoxDecoration(
           color: const Color(0x80000000),
           borderRadius: BorderRadius.circular(15),
+          border: Border.all(color: getColor(pl)),
         ),
         height: playlistSize + 10,
         width: playlistSize,

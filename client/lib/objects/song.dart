@@ -50,6 +50,14 @@ class Song {
     );
   }
 
+  Song.copy(Song s)
+      : title = s.title,
+        artist = s.artist,
+        imgUrl = s.imgUrl,
+        duration = s.duration,
+        platformId = s.platformId,
+        platform = s.platform;
+
   Song.empty()
       : title = '',
         artist = '',

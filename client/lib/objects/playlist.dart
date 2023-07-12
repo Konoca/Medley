@@ -17,6 +17,7 @@ class Playlist {
   final int numberOfTracks;
   List<Song> songs;
   bool isDownloaded = false;
+  bool isDownloading = false;
 
   Playlist(
     this.title,
@@ -72,6 +73,14 @@ class Playlist {
         map['is_downloaded'],
     );
   }
+
+  Playlist.copy(Playlist pl)
+      : title = pl.title,
+        platform = pl.platform,
+        listId = pl.listId,
+        imgUrl = pl.imgUrl,
+        numberOfTracks = pl.numberOfTracks,
+        songs = pl.songs.map<Song>((s) => Song.copy(s)).toList();
 
   Playlist.empty()
       : title = '',

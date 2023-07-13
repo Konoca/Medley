@@ -22,11 +22,15 @@ class _HomePageState extends State<HomePage> {
   double playlistSize = 200;
 
   Widget getImage(Playlist pl) {
-    if (pl.isDownloaded) return SquareImage(FileImage(File(pl.imgUrl)), playlistSize - 50, isLoading: pl.isDownloading);
-
+    bool songImg = false;
     String img = pl.imgUrl;
-    if (img.isEmpty && pl.songs.isNotEmpty) img = pl.songs.first.imgUrl;
-    return SquareImage(NetworkImage(pl.imgUrl), playlistSize - 50, isLoading: pl.isDownloading);
+    if (img.isEmpty && pl.songs.isNotEmpty) {
+      img = pl.songs.first.imgUrl;
+      songImg = true;
+    }
+
+    if (pl.isDownloaded || (songImg && pl.songs.first.isDownloaded)) return SquareImage(FileImage(File(img)), playlistSize - 50, isLoading: pl.isDownloading);
+    return SquareImage(NetworkImage(img), playlistSize - 50, isLoading: pl.isDownloading);
   }
 
   Color getColor(Playlist pl) {

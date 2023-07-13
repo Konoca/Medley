@@ -158,4 +158,47 @@ class MedleyService {
 
     return pl;
   }
+
+  downloadSong(Directory path, Playlist pl, Song song) async {
+    final Uri url = Uri.http(
+      serverUrl,
+      '/api/stream',
+    );
+
+    List<Map<String, dynamic>> body = [
+      {
+        'platform': song.platform.id,
+        'id': song.platformId,
+        'codec': song.platform.codec,
+      },
+    ];
+
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode(body),
+    );
+    final jsonBody = json.decode(response.body);
+
+    Dio dio = Dio();
+    List<Future<dynamic>> downloading = [];
+
+    for (Map<String, dynamic> s in jsonBody) {
+      if (s['id'] == null || s['platform'] == null || s['url'] == null) continue;
+      downloading.add(
+        dio.download(s['url'], '${path.path}/${pl.listId}/${s["id"]}.${song.platform.codec}')
+      );
+    }
+
+    // song img
+    String fileExt = song.imgUrl.split('.').last;
+    String downloadPath = '${path.path}/${pl.listId}/${song.platformId}.$fileExt';
+    downloading.add(dio.download(song.imgUrl, downloadPath));
+    song.imgUrl = downloadPath;
+    song.isDownloaded = true;
+
+    await Future.wait(downloading);
+
+    return pl;
+  }
 }

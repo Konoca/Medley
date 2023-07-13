@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:medley/components/image.dart';
 import 'package:medley/components/media_controls.dart';
@@ -33,6 +34,46 @@ class _PlaylistPageState extends State<PlaylistPage> {
     return InkWell(
       onTap: () {
         context.read<CurrentlyPlaying>().setPlaylist(pl, song: song);
+      },
+      onSecondaryTap: () {
+        // TODO implement for desktop/web
+        if (kIsWeb) return;
+      },
+      onLongPress: () {
+        if (kIsWeb) return;
+        showModalBottomSheet(context: context, builder: (builder) {
+          return Wrap(
+            children: [
+              pl.platform.id == 0 && !song.isDownloaded ? ListTile(
+                leading: const Icon(Icons.download),
+                title: const Text('Download'),
+                onTap: () {
+                  context.read<UserData>().downloadSong(pl, song);
+                  Navigator.of(context).pop();
+                  context.read<CurrentPage>().setPlaylist(pl);
+                }
+              ) : Container(),
+              ListTile(
+                leading: const Icon(Icons.save),
+                title: const Text('Save to'),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  context.read<UserData>().saveToPlaylist(context, song);
+                }
+              ),
+              ListTile(
+                leading: const Icon(Icons.delete),
+                title: const Text('Remove'),
+                onTap: () {
+                  context.read<UserData>().removeFromPlaylist(pl, song);
+                  Navigator.of(context).pop();
+                  context.read<CurrentPage>().setPlaylist(pl);
+                }
+              ),
+              const ListTile(),
+            ],
+          );
+        });
       },
       child: Container(
         decoration: BoxDecoration(

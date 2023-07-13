@@ -14,7 +14,7 @@ class Playlist {
   AudioPlatform platform;
   final String listId;
   String imgUrl;
-  final int numberOfTracks;
+  int numberOfTracks;
   List<Song> songs;
   bool isDownloaded = false;
   bool isDownloading = false;
@@ -105,6 +105,18 @@ class Playlist {
       'is_downloaded': isDownloaded,
     };
   }
+
+  @override
+  bool operator ==(covariant Playlist other) =>
+    title == other.title &&
+    platform.id == other.platform.id &&
+    listId == other.listId &&
+    imgUrl == other.imgUrl;
+    // numberOfTracks == other.numberOfTracks;
+    // songs == other.songs;
+
+  @override
+  int get hashCode => '${platform.id}${listId.hashCode}${title.hashCode}'.hashCode;
 }
 
 class AllPlaylists {

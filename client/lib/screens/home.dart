@@ -23,6 +23,9 @@ class _HomePageState extends State<HomePage> {
 
   Widget getImage(Playlist pl) {
     if (pl.isDownloaded) return SquareImage(FileImage(File(pl.imgUrl)), playlistSize - 50, isLoading: pl.isDownloading);
+
+    String img = pl.imgUrl;
+    if (img.isEmpty && pl.songs.isNotEmpty) img = pl.songs.first.imgUrl;
     return SquareImage(NetworkImage(pl.imgUrl), playlistSize - 50, isLoading: pl.isDownloading);
   }
 

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:medley/objects/platform.dart';
 import 'package:medley/objects/playlist.dart';
+import 'package:medley/objects/song.dart';
 
 import 'package:medley/objects/user.dart';
 import 'package:medley/services/google_auth.dart';
@@ -245,7 +246,7 @@ class UserData with ChangeNotifier {
                   _allPlaylists.custom.add(Playlist(
                     value,
                     AudioPlatform.empty(),
-                    value,
+                    'custom/$value',
                     '',
                     0,
                     [],
@@ -261,6 +262,7 @@ class UserData with ChangeNotifier {
       },
     );
   }
+
   void removePlaylist(Playlist pl) async {
     switch (pl.platform.id) {
       case 0:
@@ -285,6 +287,22 @@ class UserData with ChangeNotifier {
     notifyListeners();
   }
 
+  void removeFromPlaylist(Playlist pl, Song s) async {
+    pl.songs.remove(s);
+    pl.numberOfTracks--;
+
+    final Directory dir = await getStorageDirectory();
+    final File f = File('${dir.path}/${pl.listId}/${s.platformId}.${s.platform.codec}');
+    if (await f.exists()) await f.delete();
+
+    final File f2 = File(s.imgUrl);
+    if (await f2.exists()) await f2.delete();
+
+    _allPlaylists.save();
+    notifyListeners();
+    // TODO doesnt update in real time
+  }
+
   void savePlaylist(Playlist pl) async {
     if (pl.songs.isEmpty) pl = await MedleyService().getSongs(getToken(pl.platform), pl);
     Playlist newPl = Playlist.copy(pl);
@@ -302,6 +320,71 @@ class UserData with ChangeNotifier {
     _allPlaylists.custom.add(newPl);
     _allPlaylists.save();
     notifyListeners();
+  }
+
+  void saveToPlaylist(BuildContext context, Song s) {
+    if (_allPlaylists.custom.isEmpty) return;
+
+    Playlist pl = _allPlaylists.custom.first;
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Select Playlist'),
+          content: DropdownButton<Playlist>(
+            value: pl, // TODO doesnt update in real time
+            items: _allPlaylists.custom.map<DropdownMenuItem<Playlist>>((Playlist v) {
+              return DropdownMenuItem<Playlist>(
+                value: v,
+                child: Text(v.title),
+              );
+            }).toList(),
+            onChanged: (Playlist? v) {
+              pl = v!;
+            }
+          ),
+          actions: <Widget>[
+            TextButton(
+              style: TextButton.styleFrom(
+                textStyle: Theme.of(context).textTheme.labelLarge,
+              ),
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              style: TextButton.styleFrom(
+                textStyle: Theme.of(context).textTheme.labelLarge,
+              ),
+              child: const Text('Save'),
+              onPressed: () async {
+                Song newS = Song.copy(s);
+
+                if (s.isDownloaded) {
+                  Directory dir = await getStorageDirectory();
+                  String fileExt = newS.imgUrl.split('.').last;
+                  String newPath = '${dir.path}/${pl.listId}/${newS.platformId}.$fileExt';
+                  File f = File(newS.imgUrl);
+                  File f2 = await f.copy(newPath);
+                  newS.imgUrl = f2.path;
+                  newS.isDownloaded = true;
+                }
+                if (!s.isDownloaded) downloadSong(pl, newS);
+
+                pl.songs.add(newS);
+                pl.numberOfTracks++;
+
+                _allPlaylists.save();
+                notifyListeners();
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void editPlaylist(BuildContext context, Playlist pl) {
@@ -350,6 +433,12 @@ class UserData with ChangeNotifier {
   Future<Playlist> downloadPlaylist(Playlist pl, AudioPlatform oldPlatform) async {
     final dir = await getStorageDirectory();
     pl = await MedleyService().downloadSongs(dir, pl, oldPlatform);
+    return pl;
+  }
+
+  Future<Playlist> downloadSong(Playlist pl, Song s) async {
+    final dir = await getStorageDirectory();
+    pl = await MedleyService().downloadSong(dir, pl, s);
     return pl;
   }
 

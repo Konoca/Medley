@@ -132,6 +132,16 @@ class _PlaylistPageState extends State<PlaylistPage> {
   Widget build(BuildContext context) {
     Playlist pl = context.watch<CurrentPage>().playlistToDisplay;
 
+    if (pl.numberOfTracks == 0) {
+      return Container(
+        alignment: Alignment.center,
+        child: const Text(
+          'Playlist is empty!',
+          style: TextStyle(color: Color(0xFF1E1E1E)),
+        )
+      );
+    }
+
     if (pl.songs.isEmpty) {
       context.watch<UserData>().updatePlaylist(pl);
       return Container(

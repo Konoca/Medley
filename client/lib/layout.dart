@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
-// import 'package:audioplayers/audioplayers.dart';
 import 'package:medley/components/image.dart';
 
 import 'package:medley/components/media_controls.dart';
@@ -14,7 +13,6 @@ import 'package:medley/providers/page_provider.dart';
 import 'package:medley/screens/home.dart';
 import 'package:medley/screens/playlist.dart';
 import 'package:medley/screens/search.dart';
-import 'package:medley/screens/account.dart';
 import 'package:medley/screens/settings.dart';
 
 import 'package:medley/providers/song_provider.dart';

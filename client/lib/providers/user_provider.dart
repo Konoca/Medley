@@ -322,7 +322,7 @@ class UserData with ChangeNotifier {
     notifyListeners();
   }
 
-  void saveToPlaylist(BuildContext context, Song s) {
+  void saveToPlaylist(BuildContext context, Playlist oldPlaylist, Song s) {
     if (_allPlaylists.custom.isEmpty) return;
 
     Playlist pl = _allPlaylists.custom.first;
@@ -332,7 +332,7 @@ class UserData with ChangeNotifier {
       builder: (context) {
         return AlertDialog(
           title: const Text('Select Playlist'),
-          content: DropdownButton<Playlist>(
+          content: DropdownButtonFormField<Playlist>(
             value: pl, // TODO doesnt update in real time
             items: _allPlaylists.custom.map<DropdownMenuItem<Playlist>>((Playlist v) {
               return DropdownMenuItem<Playlist>(
@@ -364,11 +364,19 @@ class UserData with ChangeNotifier {
 
                 if (s.isDownloaded) {
                   Directory dir = await getStorageDirectory();
+
+                  // img
                   String fileExt = newS.imgUrl.split('.').last;
                   String newPath = '${dir.path}/${pl.listId}/${newS.platformId}.$fileExt';
                   File f = File(newS.imgUrl);
                   File f2 = await f.copy(newPath);
                   newS.imgUrl = f2.path;
+
+                  // song
+                  String newPath2 = '${dir.path}/${pl.listId}/${newS.platformId}.${newS.platform.codec}';
+                  File f3 = File('${dir.path}/${oldPlaylist.listId}/${s.platformId}.${s.platform.codec}');
+                  await f3.copy(newPath2);
+
                   newS.isDownloaded = true;
                 }
                 if (!s.isDownloaded) downloadSong(pl, newS);
@@ -433,12 +441,16 @@ class UserData with ChangeNotifier {
   Future<Playlist> downloadPlaylist(Playlist pl, AudioPlatform oldPlatform) async {
     final dir = await getStorageDirectory();
     pl = await MedleyService().downloadSongs(dir, pl, oldPlatform);
+    _allPlaylists.save();
+    notifyListeners();
     return pl;
   }
 
   Future<Playlist> downloadSong(Playlist pl, Song s) async {
     final dir = await getStorageDirectory();
     pl = await MedleyService().downloadSong(dir, pl, s);
+    _allPlaylists.save();
+    notifyListeners();
     return pl;
   }
 

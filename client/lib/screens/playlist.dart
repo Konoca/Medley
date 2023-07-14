@@ -58,7 +58,7 @@ class _PlaylistPageState extends State<PlaylistPage> {
                 title: const Text('Save to'),
                 onTap: () {
                   Navigator.of(context).pop();
-                  context.read<UserData>().saveToPlaylist(context, song);
+                  context.read<UserData>().saveToPlaylist(context, pl, song);
                 }
               ),
               ListTile(

@@ -1,8 +1,11 @@
+import 'dart:io';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:medley/components/image.dart';
 import 'package:medley/components/text.dart';
+import 'package:medley/objects/platform.dart';
 import 'package:medley/providers/page_provider.dart';
-import 'package:medley/providers/song_provider.dart';
 import 'package:medley/providers/user_provider.dart';
 
 import 'package:provider/provider.dart';
@@ -18,17 +21,73 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   double playlistSize = 200;
 
+  Widget getImage(Playlist pl) {
+    bool songImg = false;
+    String img = pl.imgUrl;
+    if (img.isEmpty && pl.songs.isNotEmpty) {
+      img = pl.songs.first.imgUrl;
+      songImg = true;
+    }
+
+    if (pl.isDownloaded || (songImg && pl.songs.first.isDownloaded)) return SquareImage(FileImage(File(img)), playlistSize - 50, isLoading: pl.isDownloading);
+    return SquareImage(NetworkImage(img), playlistSize - 50, isLoading: pl.isDownloading);
+  }
+
+  Color getColor(Playlist pl) {
+    if (pl.isDownloaded) return const Color(0xFF64F3D3);
+    return Colors.transparent;
+  }
+
   Widget createTile(Playlist pl) {
     return InkWell(
       onTap: () {
         context.read<CurrentPage>().setPlaylist(pl);
         context.read<CurrentPage>().setPageIndex(3);
       },
+      onSecondaryTap: () {
+        // TODO implement for desktop/web
+        if (kIsWeb) return;
+      },
+      onLongPress: () {
+        if (kIsWeb) return;
+        showModalBottomSheet(context: context, builder: (builder) {
+          return Wrap(
+            children: [
+              pl.platform != AudioPlatform.empty() ? ListTile(
+                leading: const Icon(Icons.save),
+                title: const Text('Save'),
+                onTap: () {
+                  context.read<UserData>().savePlaylist(pl);
+                  Navigator.of(context).pop();
+                }
+              ) : Container(),
+              ListTile(
+                leading: const Icon(Icons.edit),
+                title: const Text('Edit'),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  context.read<UserData>().editPlaylist(context, pl);
+                }
+              ),
+              ListTile(
+                leading: const Icon(Icons.delete),
+                title: const Text('Remove'),
+                onTap: () {
+                  context.read<UserData>().removePlaylist(pl);
+                  Navigator.of(context).pop();
+                }
+              ),
+              const ListTile(),
+            ],
+          );
+        });
+      },
       borderRadius: BorderRadius.circular(15),
       child: Container(
         decoration: BoxDecoration(
           color: const Color(0x80000000),
           borderRadius: BorderRadius.circular(15),
+          border: Border.all(color: getColor(pl)),
         ),
         height: playlistSize + 10,
         width: playlistSize,
@@ -37,10 +96,7 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           children: [
             const Spacer(),
-            SquareImage(
-              NetworkImage(pl.imgUrl),
-              playlistSize - 50,
-            ),
+            getImage(pl),
             ScrollingText(
               pl.title,
               padding: const EdgeInsets.symmetric(horizontal: 15),
@@ -75,7 +131,7 @@ class _HomePageState extends State<HomePage> {
             alignment: Alignment.center,
             height: 500,
             child: const Text(
-              'Get started by linking an account!',
+              'Get started by linking an account under settings, or by creating a new playlist!',
               style: TextStyle(color: Color(0xFF1E1E1E)),
             ))
       ];
@@ -150,11 +206,12 @@ class _HomePageState extends State<HomePage> {
         children: fetchPlaylists(context),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => context.read<CurrentlyPlaying>().cache.clear(),
+        // onPressed: () => context.read<CurrentlyPlaying>().cache.clear(),
+        onPressed: () => context.read<UserData>().createCustomPlaylist(context),
         backgroundColor: const Color(0x8073A5FD),
         mini: true,
-        // child: const Icon(Icons.add),
-        child: const Text('Clear cache'),
+        child: const Icon(Icons.add),
+        // child: const Text('Clear cache'),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.miniEndFloat,
     );

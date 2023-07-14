@@ -91,7 +91,10 @@ class CustomAudioPlayer extends BaseAudioHandler
 
   @override
   playMediaItem(MediaItem mediaItem) async {
-    await _player.setAudioSource(AudioSource.uri(Uri.parse(mediaItem.id)));
+    // TODO clean up, replace '/' search with proper check
+    if (mediaItem.id.startsWith('/')) await _player.setAudioSource(AudioSource.file(mediaItem.id));
+    else await _player.setAudioSource(AudioSource.uri(Uri.parse(mediaItem.id)));
+
     super.mediaItem.add(mediaItem);
     play();
     playbackState.add(PlaybackState(
@@ -124,6 +127,12 @@ class CustomAudioPlayer extends BaseAudioHandler
     if (_player.playing) _player.stop();
 
     String url = _cache.get(_song);
+    if (_playlist.isDownloaded) {
+      final dir = await user.getStorageDirectory();
+      url = dir.path + '/${_playlist.listId}/${_song.platformId}.${_song.platform.codec}';
+    }
+
+    Uri image = _song.isDownloaded ? Uri.file(_song.imgUrl) : Uri.parse(_song.imgUrl);
 
     try {
       if (url == '') throw Exception();
@@ -131,7 +140,7 @@ class CustomAudioPlayer extends BaseAudioHandler
         id: url,
         title: _song.title,
         artist: _song.artist,
-        artUri: Uri.parse(_song.imgUrl),
+        artUri: image,
         album: _playlist.title,
         duration: _song.toDuration(),
       ));
@@ -150,7 +159,7 @@ class CustomAudioPlayer extends BaseAudioHandler
         id: url,
         title: _song.title,
         artist: _song.artist,
-        artUri: Uri.parse(_song.imgUrl),
+        artUri: image,
         album: _playlist.title,
         duration: _song.toDuration(),
       ));

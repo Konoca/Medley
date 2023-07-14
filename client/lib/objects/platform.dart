@@ -9,6 +9,7 @@ class AudioPlatform {
   final String name;
   final int id;
   final String codec;
+  final String downloadCodec;
 
   // AudioPlatform(this.name, this.id, this.codec);
 
@@ -50,21 +51,32 @@ class AudioPlatform {
   AudioPlatform.empty()
       : name = "",
         id = 0,
-        codec = "";
+        codec = "",
+        downloadCodec = "mp3";
 
   AudioPlatform.youtube()
       : name = "Youtube",
         id = 1,
-        codec = "mp4";
+        codec = "mp4",
+        downloadCodec = "mp3";
         // codec = "m4a";
 
   AudioPlatform.spotify()
       : name = "Spotify",
         id = 2,
-        codec = "mp4";
+        codec = "mp4",
+        downloadCodec = "mp3";
 
   AudioPlatform.soundcloud()
       : name = "Soundcloud",
         id = 3,
-        codec = "mp3";
+        codec = "mp3",
+        downloadCodec = "mp3";
+
+  @override
+  bool operator ==(covariant AudioPlatform other) =>
+    name == other.name && id == other.id && codec == other.codec;
+
+  @override
+  int get hashCode => id;
 }

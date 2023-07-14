@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
-// import 'package:audioplayers/audioplayers.dart';
 import 'package:medley/components/image.dart';
 
 import 'package:medley/components/media_controls.dart';
@@ -14,7 +13,7 @@ import 'package:medley/providers/page_provider.dart';
 import 'package:medley/screens/home.dart';
 import 'package:medley/screens/playlist.dart';
 import 'package:medley/screens/search.dart';
-import 'package:medley/screens/account.dart';
+import 'package:medley/screens/settings.dart';
 
 import 'package:medley/providers/song_provider.dart';
 import 'package:provider/provider.dart';
@@ -34,7 +33,8 @@ class _PageLayoutState extends State<PageLayout> {
     int pageIndex = context.watch<CurrentPage>().pageIndex;
     Widget p = const HomePage();
     if (pageIndex == 1) p = const SearchPage();
-    if (pageIndex == 2) p = const AccountPage();
+    // if (pageIndex == 2) p = const AccountPage();
+    if (pageIndex == 2) p = const SettingsPage();
     if (pageIndex == 3) p = const PlaylistPage();
     return Column(
       children: [
@@ -196,6 +196,21 @@ class _PageLayoutState extends State<PageLayout> {
     );
   }
 
+  Widget getImage(CurrentlyPlaying cp) {
+    if (cp.song.isDownloaded) {
+      return SquareImage(
+        FileImage(File(cp.song.imgUrl)),
+        300,
+        isLoading: cp.isCaching,
+      );
+    }
+    return SquareImage(
+      NetworkImage(cp.song.imgUrl),
+      300,
+      isLoading: cp.isCaching,
+    );
+  }
+
   void mobileControlDrawer(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -216,11 +231,7 @@ class _PageLayoutState extends State<PageLayout> {
           padding: const EdgeInsets.only(top: 40),
           child: Column(
             children: [
-              SquareImage(
-                NetworkImage(context.watch<CurrentlyPlaying>().song.imgUrl),
-                300,
-                isLoading: context.watch<CurrentlyPlaying>().isCaching,
-              ),
+              getImage(context.watch<CurrentlyPlaying>()),
               Container(
                 alignment: Alignment.center,
                 width: double.infinity,

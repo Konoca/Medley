@@ -83,6 +83,21 @@ class _MobileMediaControlsState extends State<MobileMediaControls> {
 }
 
 class _NowPlayingState extends State<NowPlaying> {
+  Widget getImage(CurrentlyPlaying cp) {
+    if (cp.song.isDownloaded) {
+      return SquareImage(
+        FileImage(File(cp.song.imgUrl)),
+        74,
+        isLoading: cp.isCaching,
+      );
+    }
+    return SquareImage(
+      NetworkImage(cp.song.imgUrl),
+      74,
+      isLoading: cp.isCaching,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (!context.watch<CurrentlyPlaying>().display) {
@@ -96,11 +111,7 @@ class _NowPlayingState extends State<NowPlaying> {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        SquareImage(
-          NetworkImage(context.watch<CurrentlyPlaying>().song.imgUrl),
-          74,
-          isLoading: context.watch<CurrentlyPlaying>().isCaching,
-        ),
+        getImage(context.watch<CurrentlyPlaying>()),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 10),
           width: isMobile() ? MediaQuery.of(context).size.width / 2 : 190,

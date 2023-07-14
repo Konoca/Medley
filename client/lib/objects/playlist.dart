@@ -10,12 +10,14 @@ const String spotifyStorageKey = 'medley_playtlists_spotify';
 const String soundcloudStorageKey = 'medley_playtlists_soundcloud';
 
 class Playlist {
-  final String title;
-  final AudioPlatform platform;
+  String title;
+  AudioPlatform platform;
   final String listId;
-  final String imgUrl;
-  final int numberOfTracks;
+  String imgUrl;
+  int numberOfTracks;
   List<Song> songs;
+  bool isDownloaded = false;
+  bool isDownloading = false;
 
   Playlist(
     this.title,
@@ -24,6 +26,9 @@ class Playlist {
     this.imgUrl,
     this.numberOfTracks,
     this.songs,
+    [
+      this.isDownloaded = false,
+    ]
   );
 
   factory Playlist.fromJsonWithSongs(Map<String, dynamic> json) {
@@ -40,6 +45,7 @@ class Playlist {
       json['thumbnail'],
       songs.length,
       songs,
+      json['is_downloaded'],
     );
   }
 
@@ -52,6 +58,7 @@ class Playlist {
       json['thumbnail'],
       json['songs'],
       [],
+      json['is_downloaded'] ?? false,
     );
   }
 
@@ -62,8 +69,18 @@ class Playlist {
         map['playlist_id'],
         map['thumbnail'],
         map['number_of_songs'],
-        map['songs'].map<Song>((s) => Song.fromStorageMap(s)).toList());
+        map['songs'].map<Song>((s) => Song.fromStorageMap(s)).toList(),
+        map['is_downloaded'],
+    );
   }
+
+  Playlist.copy(Playlist pl)
+      : title = pl.title,
+        platform = pl.platform,
+        listId = pl.listId,
+        imgUrl = pl.imgUrl,
+        numberOfTracks = pl.numberOfTracks,
+        songs = pl.songs.map<Song>((s) => Song.copy(s)).toList();
 
   Playlist.empty()
       : title = '',
@@ -84,9 +101,22 @@ class Playlist {
       'playlist_id': listId,
       'thumbnail': imgUrl,
       'number_of_songs': numberOfTracks,
-      'songs': songs.map((song) => song.toStorageMap()).toList()
+      'songs': songs.map((song) => song.toStorageMap()).toList(),
+      'is_downloaded': isDownloaded,
     };
   }
+
+  @override
+  bool operator ==(covariant Playlist other) =>
+    title == other.title &&
+    platform.id == other.platform.id &&
+    listId == other.listId &&
+    imgUrl == other.imgUrl;
+    // numberOfTracks == other.numberOfTracks;
+    // songs == other.songs;
+
+  @override
+  int get hashCode => '${platform.id}${listId.hashCode}${title.hashCode}'.hashCode;
 }
 
 class AllPlaylists {
@@ -152,15 +182,22 @@ class AllPlaylists {
   }
 
   void save() {
+    _storage.delete(key: customStorageKey);
     _storage.write(
         key: customStorageKey,
         value: jsonEncode(custom.map((pl) => pl.toStorageMap()).toList()));
+
+    _storage.delete(key: youtubeStorageKey);
     _storage.write(
         key: youtubeStorageKey,
         value: jsonEncode(youtube.map((pl) => pl.toStorageMap()).toList()));
+
+    _storage.delete(key: spotifyStorageKey);
     _storage.write(
         key: spotifyStorageKey,
         value: jsonEncode(spotify.map((pl) => pl.toStorageMap()).toList()));
+
+    _storage.delete(key: soundcloudStorageKey);
     _storage.write(
         key: soundcloudStorageKey,
         value: jsonEncode(soundcloud.map((pl) => pl.toStorageMap()).toList()));

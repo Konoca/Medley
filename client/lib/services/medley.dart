@@ -1,6 +1,8 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:dio/dio.dart';
 
 import 'package:medley/objects/platform.dart';
 import 'package:medley/objects/playlist.dart';
@@ -102,5 +104,101 @@ class MedleyService {
         user: await user.spotifyAccount.spotifyApi.me
             .get()
             .then((user) => user.id));
+  }
+
+  downloadSongs(Directory path, Playlist pl, AudioPlatform oldPlatform) async {
+    final Uri url = Uri.http(
+      serverUrl,
+      '/api/stream',
+    );
+
+    List<Map<String, dynamic>> body = [];
+    for (Song song in pl.songs) {
+      body.add(
+        {
+          'platform': song.platform.id,
+          'id': song.platformId,
+          'codec': song.platform.codec,
+        },
+      );
+    }
+
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode(body),
+    );
+    final jsonBody = json.decode(response.body);
+
+    Dio dio = Dio();
+    List<Future<dynamic>> downloading = [];
+    for (Map<String, dynamic> s in jsonBody) {
+      if (s['id'] == null || s['platform'] == null || s['url'] == null) continue;
+      downloading.add(
+        dio.download(s['url'], '${path.path}/${pl.listId}/${s["id"]}.${oldPlatform.codec}')
+      );
+    }
+
+    // song imgs
+    for (Song s in pl.songs) {
+      String fileExt = s.imgUrl.split('.').last;
+      String downloadPath = '${path.path}/${pl.listId}/${s.platformId}.$fileExt';
+      downloading.add(dio.download(s.imgUrl, downloadPath));
+      s.imgUrl = downloadPath;
+      s.isDownloaded = true;
+    }
+
+    // playlist img
+    String fileExt = pl.imgUrl.split('.').last;
+    String downloadPath = '${path.path}/${pl.listId}/${pl.listId}.$fileExt';
+    downloading.add(dio.download(pl.imgUrl, downloadPath));
+    pl.imgUrl = downloadPath;
+
+    await Future.wait(downloading);
+
+    return pl;
+  }
+
+  downloadSong(Directory path, Playlist pl, Song song) async {
+    final Uri url = Uri.http(
+      serverUrl,
+      '/api/stream',
+    );
+
+    List<Map<String, dynamic>> body = [
+      {
+        'platform': song.platform.id,
+        'id': song.platformId,
+        'codec': song.platform.codec,
+      },
+    ];
+
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode(body),
+    );
+    final jsonBody = json.decode(response.body);
+
+    Dio dio = Dio();
+    List<Future<dynamic>> downloading = [];
+
+    for (Map<String, dynamic> s in jsonBody) {
+      if (s['id'] == null || s['platform'] == null || s['url'] == null) continue;
+      downloading.add(
+        dio.download(s['url'], '${path.path}/${pl.listId}/${s["id"]}.${song.platform.codec}')
+      );
+    }
+
+    // song img
+    String fileExt = song.imgUrl.split('.').last;
+    String downloadPath = '${path.path}/${pl.listId}/${song.platformId}.$fileExt';
+    downloading.add(dio.download(song.imgUrl, downloadPath));
+    song.imgUrl = downloadPath;
+    song.isDownloaded = true;
+
+    await Future.wait(downloading);
+
+    return pl;
   }
 }

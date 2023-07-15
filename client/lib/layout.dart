@@ -315,7 +315,7 @@ class _PageLayoutState extends State<PageLayout> {
               color: Color(0x80404040),
             ),
             child: IconButton(
-              icon: const Icon(Icons.account_circle),
+              icon: const Icon(Icons.settings),
               onPressed: () => context.read<CurrentPage>().setPageIndex(2),
               // color: const Color(0xff1E1E1E),
               color: Colors.white,

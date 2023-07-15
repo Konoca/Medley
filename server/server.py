@@ -95,6 +95,22 @@ def get_songs():
 
     return jsonify(songs)
 
+# get a list of search results
+@app.route('/api/search', methods=['GET'])
+def search():
+    query = request.args.get('q', '')
+    limit = int(request.args.get('limit', '5'))
+    token = request.args.get('sp_token', '')
+
+    results = {}
+
+    results[0] = youtube.search(query, limit)
+    results[1] = spotify.search(query, limit, token)
+
+    # TODO Soundcloud Support
+
+    return jsonify(results)
+
 # Main Thread
 if __name__ == '__main__':
     app.run(host='0.0.0.0')

@@ -1,6 +1,7 @@
 import requests
 import json
 import concurrent.futures
+from youtubesearchpython import VideosSearch
 
 API = 'https://youtube.googleapis.com/youtube/v3/'
 
@@ -136,3 +137,21 @@ def _parse_playlist(playlist, token, scope):
         'thumbnail': playlist['snippet']['thumbnails']['high']['url'],
         'songs': songs
     }
+
+
+def search(query: str, limit: int):
+    results = VideosSearch(query, limit=limit)
+    results = results.result().get('result', [])
+
+    videos = []
+    for r in results:
+        videos.append({
+            'platform': '1',
+            'song_id': r['id'],
+            'song_title': r['title'],
+            'artist': r['channel']['name'],
+            'duration': r['duration'],
+            'thumbnail': r['thumbnails'][-1]['url']
+        })
+
+    return videos

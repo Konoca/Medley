@@ -11,6 +11,26 @@ import 'package:medley/providers/user_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:medley/objects/playlist.dart';
 
+Widget platformLabel(String asset, String name) {
+    return Row(
+      children: [
+        Image.asset(
+          asset,
+          height: 40,
+          color: Colors.white,
+        ),
+        Text(
+          name,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 40,
+            fontWeight: FontWeight.bold,
+          ),
+        )
+      ],
+    );
+  }
+
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -174,26 +194,6 @@ class _HomePageState extends State<HomePage> {
     }
     w.add(Row(children: children));
     return w;
-  }
-
-  Widget platformLabel(String asset, String name) {
-    return Row(
-      children: [
-        Image.asset(
-          asset,
-          height: 40,
-          color: Colors.white,
-        ),
-        Text(
-          name,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 40,
-            fontWeight: FontWeight.bold,
-          ),
-        )
-      ],
-    );
   }
 
   @override

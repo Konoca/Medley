@@ -26,12 +26,18 @@ class Song {
   );
 
   factory Song.fromJson(
-      Map<String, dynamic> json, AudioPlatform platform, Playlist pl) {
+    Map<String, dynamic> json,
+    AudioPlatform platform,
+    Playlist pl,
+    {
+      parseDuration = true,
+    }
+  ) {
     return Song(
       json['song_title'],
       json['artist'],
       json['thumbnail'] != '' ? json['thumbnail'] : pl.imgUrl,
-      platform.parseDuration(json),
+      parseDuration ? platform.parseDuration(json) : json['duration'] + '0000000',
       json['song_id'],
       platform,
       json['is_downloaded'] ?? false,

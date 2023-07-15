@@ -333,7 +333,7 @@ class UserData with ChangeNotifier {
         return AlertDialog(
           title: const Text('Select Playlist'),
           content: DropdownButtonFormField<Playlist>(
-            value: pl, // TODO doesnt update in real time
+            value: pl,
             items: _allPlaylists.custom.map<DropdownMenuItem<Playlist>>((Playlist v) {
               return DropdownMenuItem<Playlist>(
                 value: v,

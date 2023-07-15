@@ -201,4 +201,32 @@ class MedleyService {
 
     return pl;
   }
+
+  search(String query, int limit, UserData user) async {
+    final Uri url = Uri.http(
+      serverUrl,
+      '/api/search',
+      {
+        'q': query,
+        'limit': limit.toString(),
+        'sp_token': user.spotifyAccount.accessToken,
+        'platforms': '1,2,3'
+      },
+    );
+
+    final response = await http.get(url);
+    final jsonBody = json.decode(response.body);
+
+    Map<String, List<Song>> results = {
+      '1': [],
+      '2': [],
+      '3': [],
+    };
+
+    results['1']?.addAll(jsonBody['1'].map<Song>((s) => Song.fromJson(s, AudioPlatform.youtube(), Playlist.empty(), parseDuration: false)));
+    results['2']?.addAll(jsonBody['2'].map<Song>((s) => Song.fromJson(s, AudioPlatform.spotify(), Playlist.empty())));
+    results['3']?.addAll(jsonBody['3'].map<Song>((s) => Song.fromJson(s, AudioPlatform.soundcloud(), Playlist.empty())));
+
+    return results;
+  }
 }

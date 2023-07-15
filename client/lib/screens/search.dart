@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:medley/components/image.dart';
 import 'package:medley/components/media_controls.dart';
@@ -85,6 +86,28 @@ class _SearchPageState extends State<SearchPage> {
           ),
           song: song
         );
+      },
+      onSecondaryTap: () {
+        // TODO implement for desktop/web
+        if (kIsWeb) return;
+      },
+      onLongPress: () {
+        if (kIsWeb) return;
+        showModalBottomSheet(context: context, builder: (builder) {
+          return Wrap(
+            children: [
+              ListTile(
+                leading: const Icon(Icons.save),
+                title: const Text('Save to'),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  context.read<UserData>().saveToPlaylist(context, Playlist.empty(), song);
+                }
+              ),
+              const ListTile(),
+            ],
+          );
+        });
       },
       child: Container(
         decoration: const BoxDecoration(

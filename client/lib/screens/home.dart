@@ -159,7 +159,7 @@ class _HomePageState extends State<HomePage> {
             alignment: Alignment.center,
             height: 500,
             child: const Text(
-              'Get started by linking an account under settings, or by creating a new playlist!',
+              'Get started by linking an account under settings!',
               style: TextStyle(color: Color(0xFF1E1E1E)),
             ))
       ];

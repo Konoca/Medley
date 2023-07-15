@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:medley/components/image.dart';
 import 'package:medley/components/media_controls.dart';
 import 'package:medley/components/text.dart';
-import 'package:medley/objects/platform.dart';
 import 'package:medley/objects/playlist.dart';
 import 'package:medley/objects/song.dart';
 import 'package:medley/providers/page_provider.dart';
@@ -12,6 +11,14 @@ import 'package:medley/providers/user_provider.dart';
 import 'package:medley/screens/home.dart';
 import 'package:medley/services/medley.dart';
 import 'package:provider/provider.dart';
+
+
+Widget loadingCircle() {
+    return Container(
+      alignment: Alignment.center,
+      child: const CircularProgressIndicator(color: Color(0xFF837AFA)),
+    );
+  }
 
 class SearchPage extends StatefulWidget {
   const SearchPage({
@@ -24,17 +31,12 @@ class SearchPage extends StatefulWidget {
 
 class _SearchPageState extends State<SearchPage> {
   String query = '';
-  Widget results = Container(
-    alignment: Alignment.center,
-    child: const CircularProgressIndicator(color: Color(0xFF837AFA)),
-  );
-  bool loaded = false;
+  Widget results = loadingCircle();
 
   search(String query) async {
     UserData user = context.read<UserData>();
     final results = await MedleyService().search(query, 10, user);
 
-    // return resultLayout(results['1'], results['2'], results['3']);
     setState(() => this.results = resultLayout(
       results['1'],
       results['2'],
@@ -48,6 +50,7 @@ class _SearchPageState extends State<SearchPage> {
     Widget scList = resultList(sc);
 
     List<Widget> w = [
+      isMobile() ? mobileSearchBar() : Container(),
       platformLabel('assets/icons/youtube.png', "Youtube"),
       ytList,
       platformLabel('assets/icons/spotify.png', "Spotify"),
@@ -56,8 +59,18 @@ class _SearchPageState extends State<SearchPage> {
       scList
     ];
 
-    // if (isMobile()) return ListView(children: w);
     // return Row(children: w);
+    // if (isMobile()) {
+    //   return Column(
+    //     mainAxisSize: MainAxisSize.max,
+    //     children: [
+    //       mobileSearchBar(),
+    //       ListView(
+    //         children: w
+    //       ),
+    //     ]
+    //   );
+    // }
     return ListView(children: w);
   }
 
@@ -153,13 +166,49 @@ class _SearchPageState extends State<SearchPage> {
     );
   }
 
+  Widget mobileSearchBar() {
+    return SizedBox(
+      child: TextFormField(
+        decoration: const InputDecoration(
+          border: OutlineInputBorder(),
+          prefixIcon: Icon(Icons.search),
+        ),
+        initialValue: query,
+        onFieldSubmitted: (v) {
+          setState(() => query = v);
+          context.read<CurrentPage>().setSearchQuery(v);
+          search(query);
+          setState(() => results = Column(
+            children: [
+              mobileSearchBar(),
+              loadingCircle(),
+            ]
+          ));
+        }
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     String q = context.watch<CurrentPage>().searchQuery;
+
     if (q != '' && q != query) {
       search(q);
       setState(() => query = q);
     }
+
+    if (isMobile() && q == '' && query == '') {
+      setState(() => results = mobileSearchBar());
+      // if (q == '' && query == '') setState(() => results = Container());
+      // return ListView(
+      //   children: [
+      //     mobileSearchBar(),
+      //     results,
+      //   ]
+      // );
+    }
+
     return results;
   }
 }

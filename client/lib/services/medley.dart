@@ -197,9 +197,9 @@ class MedleyService {
     String downloadPath = '${path.path}/${pl.listId}/${song.platformId}.$fileExt';
     downloading.add(dio.download(song.imgUrl, downloadPath));
     song.imgUrl = downloadPath;
-    song.isDownloaded = true;
 
     await Future.wait(downloading);
+    song.isDownloaded = true;
 
     return pl;
   }
@@ -211,7 +211,7 @@ class MedleyService {
       {
         'q': query,
         'limit': limit.toString(),
-        'sp_token': user.spotifyAccount.accessToken,
+        'sp_token': user.spotifyAccount.isAuthenticated ? user.spotifyAccount.accessToken : '',
         'platforms': '1,2,3'
       },
     );

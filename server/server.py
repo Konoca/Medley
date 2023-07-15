@@ -101,14 +101,17 @@ def search():
     query = request.args.get('q', '')
     limit = int(request.args.get('limit', '5'))
     token = request.args.get('sp_token', '')
+    platforms = request.args.get('platforms', '').split(',')
 
     results = {}
+    results['platforms'] = platforms
+    # print(platforms)
 
-    results[0] = youtube.search(query, limit)
-    results[1] = spotify.search(query, limit, token) if token else []
+    results['1'] = youtube.search(query, limit) if '1' in platforms else []
+    results['2'] = spotify.search(query, limit, token) if token and '2' in platforms else []
 
     # TODO Soundcloud Support
-    results[2] = []
+    results['3'] = []
 
     return jsonify(results)
 

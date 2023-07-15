@@ -105,9 +105,10 @@ def search():
     results = {}
 
     results[0] = youtube.search(query, limit)
-    results[1] = spotify.search(query, limit, token)
+    results[1] = spotify.search(query, limit, token) if token else []
 
     # TODO Soundcloud Support
+    results[2] = []
 
     return jsonify(results)
 

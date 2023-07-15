@@ -74,6 +74,14 @@ class _HomePageState extends State<HomePage> {
           return Wrap(
             children: [
               pl.platform != AudioPlatform.empty() ? ListTile(
+                leading: const Icon(Icons.refresh),
+                title: const Text('Reload'),
+                onTap: () {
+                  context.read<UserData>().updatePlaylist(pl);
+                  Navigator.of(context).pop();
+                }
+              ) : Container(),
+              pl.platform != AudioPlatform.empty() ? ListTile(
                 leading: const Icon(Icons.save),
                 title: const Text('Save'),
                 onTap: () {

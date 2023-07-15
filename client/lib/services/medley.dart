@@ -85,6 +85,8 @@ class MedleyService {
         .map<Song>((s) => Song.fromJson(s, playlist.platform, playlist))
         .toList();
 
+    playlist.numberOfTracks = playlist.songs.length;
+
     return playlist;
   }
 

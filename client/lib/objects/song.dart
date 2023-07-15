@@ -37,7 +37,7 @@ class Song {
       json['song_title'],
       json['artist'],
       json['thumbnail'] != '' ? json['thumbnail'] : pl.imgUrl,
-      parseDuration ? platform.parseDuration(json) : json['duration'] + '0000000',
+      parseDuration ? platform.parseDuration(json) : json['duration'] + ':000000',
       json['song_id'],
       platform,
       json['is_downloaded'] ?? false,

@@ -458,4 +458,14 @@ class UserData with ChangeNotifier {
     final Directory dir = await getApplicationDocumentsDirectory();
     return dir;
   }
+
+  void removeAllCustomPlaylist() async {
+    for(Playlist pl in _allPlaylists.custom) {
+      removePlaylist(pl);
+    }
+
+    _storage.delete(key: customStorageKey);
+    _allPlaylists.save();
+    notifyListeners();
+  }
 }

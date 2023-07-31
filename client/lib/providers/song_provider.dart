@@ -11,6 +11,7 @@ class CurrentlyPlaying with ChangeNotifier {
   late AllPlaylists _allPlaylists;
 
   late CustomAudioPlayer _handler;
+  CustomAudioPlayer get handler => _handler;
   late AudioSession session;
 
   bool get display => _display;

@@ -25,11 +25,6 @@ Future<void> main() async {
     WidgetsFlutterBinding.ensureInitialized();
   }
   if (kIsWeb || Platform.isAndroid || Platform.isIOS || Platform.isMacOS) {
-    // await JustAudioBackground.init(
-    //   androidNotificationChannelId: 'com.konoca.medley.channel.audio',
-    //   androidNotificationChannelName: 'Medley',
-    //   androidNotificationOngoing: true,
-    // );
     _audioHandler = await AudioService.init(
       builder: () => CustomAudioPlayer(),
       config: const AudioServiceConfig(

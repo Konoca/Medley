@@ -11,6 +11,26 @@ import 'package:medley/providers/user_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:medley/objects/playlist.dart';
 
+Widget platformLabel(String asset, String name) {
+    return Row(
+      children: [
+        Image.asset(
+          asset,
+          height: 40,
+          color: Colors.white,
+        ),
+        Text(
+          name,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 40,
+            fontWeight: FontWeight.bold,
+          ),
+        )
+      ],
+    );
+  }
+
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -53,6 +73,14 @@ class _HomePageState extends State<HomePage> {
         showModalBottomSheet(context: context, builder: (builder) {
           return Wrap(
             children: [
+              pl.platform != AudioPlatform.empty() ? ListTile(
+                leading: const Icon(Icons.refresh),
+                title: const Text('Reload'),
+                onTap: () {
+                  context.read<UserData>().updatePlaylist(pl);
+                  Navigator.of(context).pop();
+                }
+              ) : Container(),
               pl.platform != AudioPlatform.empty() ? ListTile(
                 leading: const Icon(Icons.save),
                 title: const Text('Save'),
@@ -131,7 +159,7 @@ class _HomePageState extends State<HomePage> {
             alignment: Alignment.center,
             height: 500,
             child: const Text(
-              'Get started by linking an account under settings, or by creating a new playlist!',
+              'Get started by linking an account under settings!',
               style: TextStyle(color: Color(0xFF1E1E1E)),
             ))
       ];
@@ -174,26 +202,6 @@ class _HomePageState extends State<HomePage> {
     }
     w.add(Row(children: children));
     return w;
-  }
-
-  Widget platformLabel(String asset, String name) {
-    return Row(
-      children: [
-        Image.asset(
-          asset,
-          height: 40,
-          color: Colors.white,
-        ),
-        Text(
-          name,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 40,
-            fontWeight: FontWeight.bold,
-          ),
-        )
-      ],
-    );
   }
 
   @override

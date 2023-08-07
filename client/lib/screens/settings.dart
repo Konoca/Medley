@@ -45,6 +45,34 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
+  Widget buttonCard(BuildContext context, IconData icon, String text, Function onTap) {
+    return InkWell(
+      onTap: () => onTap(),
+      child: Container(
+        decoration: BoxDecoration(
+          border: Border.all(color: const Color(0xFF1E1E1E)),
+          color: const Color(0x801E1E1E),
+        ),
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+        margin: const EdgeInsets.symmetric(vertical: 5),
+        child: Row(
+          children: [
+            Icon(
+              icon,
+              size: 50,
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(text, style: const TextStyle(fontWeight: FontWeight.bold)),
+              ],
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
   accounts(UserData userData) {
     return [
       // accountCard(
@@ -78,13 +106,33 @@ class _SettingsPageState extends State<SettingsPage> {
     ];
   }
 
+  dataButtons(UserData userData, CurrentlyPlaying currentlyPlaying) {
+    return [
+      buttonCard(
+        context,
+        Icons.delete,
+        'Delete custom playlists',
+        () => userData.removeAllCustomPlaylist(),
+      ),
+      buttonCard(
+        context,
+        Icons.delete,
+        'Delete cache',
+        () => currentlyPlaying.cache.clear(),
+      ),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     UserData userData = context.watch<UserData>();
+    CurrentlyPlaying currentlyPlaying = context.watch<CurrentlyPlaying>();
     return ListView(
       children: [
         const Text("Accounts", style: TextStyle(fontSize: 30), textAlign: TextAlign.center),
         ...accounts(userData),
+        const Text("Data", style: TextStyle(fontSize: 30), textAlign: TextAlign.center),
+        ...dataButtons(userData, currentlyPlaying),
       ],
     );
   }

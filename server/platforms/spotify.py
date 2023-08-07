@@ -138,3 +138,38 @@ def _parse_song(song):
         print(e)
         return
 
+
+def search(query: str, limit: int, token: str):
+    headers = {'Authorization': f'Bearer {token}'}
+    url = API + f'search?q={query}&limit={limit}&type=track'
+
+    processes = []
+    songs = []
+
+    while True:
+        response = requests.get(url, headers=headers)
+        if response.status_code != 200:
+            break
+
+        body = json.loads(response.content)
+        tracks = body.get('tracks', {})
+        items = tracks.get('items', [])
+
+        with concurrent.futures.ProcessPoolExecutor() as executor:
+            for item in items:
+                processes.append(
+                    executor.submit(
+                        _parse_song,
+                        item,
+                    )
+                )
+        url = body.get('next', '')
+        if not url:
+            break
+
+    for process in processes:
+        result = process.result()
+        if result: songs.append(result)
+
+
+    return songs

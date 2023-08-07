@@ -4,6 +4,12 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:medley/objects/platform.dart';
 import 'package:medley/objects/playlist.dart';
 
+String fixDuration(String duration) {
+  String newDuration = duration;
+  if (duration.split(':').length != 3) newDuration = '00:$duration';
+  return '$newDuration:000000';
+}
+
 class Song {
   final String title;
   final String artist;
@@ -26,12 +32,18 @@ class Song {
   );
 
   factory Song.fromJson(
-      Map<String, dynamic> json, AudioPlatform platform, Playlist pl) {
+    Map<String, dynamic> json,
+    AudioPlatform platform,
+    Playlist pl,
+    {
+      parseDuration = true,
+    }
+  ) {
     return Song(
       json['song_title'],
       json['artist'],
       json['thumbnail'] != '' ? json['thumbnail'] : pl.imgUrl,
-      platform.parseDuration(json),
+      parseDuration ? platform.parseDuration(json) : fixDuration(json['duration']),
       json['song_id'],
       platform,
       json['is_downloaded'] ?? false,

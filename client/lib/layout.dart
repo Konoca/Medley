@@ -28,6 +28,7 @@ class PageLayout extends StatefulWidget {
 class _PageLayoutState extends State<PageLayout> {
   double progress = 0;
   Duration songDuration = Duration.zero;
+  String query = '';
 
   Widget selectPage(BuildContext ctx) {
     int pageIndex = context.watch<CurrentPage>().pageIndex;
@@ -293,13 +294,17 @@ class _PageLayoutState extends State<PageLayout> {
                   color: Colors.white,
                 ),
               ),
-              const SizedBox(
+              SizedBox(
                 width: 250,
                 child: TextField(
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     border: UnderlineInputBorder(),
                     // labelText: 'Search',
                   ),
+                  onSubmitted: (v) {
+                    setState(() => query = v);
+                    context.read<CurrentPage>().search(query);
+                  }
                 ),
               ),
             ],
@@ -310,7 +315,7 @@ class _PageLayoutState extends State<PageLayout> {
               color: Color(0x80404040),
             ),
             child: IconButton(
-              icon: const Icon(Icons.account_circle),
+              icon: const Icon(Icons.settings),
               onPressed: () => context.read<CurrentPage>().setPageIndex(2),
               // color: const Color(0xff1E1E1E),
               color: Colors.white,

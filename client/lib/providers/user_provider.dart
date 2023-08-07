@@ -333,7 +333,7 @@ class UserData with ChangeNotifier {
         return AlertDialog(
           title: const Text('Select Playlist'),
           content: DropdownButtonFormField<Playlist>(
-            value: pl, // TODO doesnt update in real time
+            value: pl,
             items: _allPlaylists.custom.map<DropdownMenuItem<Playlist>>((Playlist v) {
               return DropdownMenuItem<Playlist>(
                 value: v,
@@ -457,5 +457,15 @@ class UserData with ChangeNotifier {
   Future<Directory> getStorageDirectory() async {
     final Directory dir = await getApplicationDocumentsDirectory();
     return dir;
+  }
+
+  void removeAllCustomPlaylist() async {
+    for(Playlist pl in _allPlaylists.custom) {
+      removePlaylist(pl);
+    }
+
+    _storage.delete(key: customStorageKey);
+    _allPlaylists.save();
+    notifyListeners();
   }
 }
